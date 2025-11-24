@@ -1,0 +1,34 @@
+services:
+  e-learning-db:
+    image: postgres:17.5-alpine
+    container_name: e-learning-db
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: e-learning
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123456
+    volumes:
+      - e-learning:/var/lib/postgresql/data
+  e-learning:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    environment:
+      - DATABASE_HOST=e-learning-db
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=root
+      - DATABASE_PASSWORD=123456
+      - DATABASE_NAME=postgres
+      - DATABASE_TYPE=postgres
+      - DATABASE_SSL_MODE=false
+      - DATABASE_CHANNEL_BINDING=require
+      - TZ=Asia/Ho_Chi_Minh
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+volumes:
+  e-learning:
