@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: app
+    container_name: e-learning-app
     environment:
       - DATABASE_HOST=e-learning-db
       - DATABASE_PORT=5432
