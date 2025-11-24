@@ -27,8 +27,8 @@ services:
       - DATABASE_CHANNEL_BINDING=require
       - TZ=Asia/Ho_Chi_Minh
     expose:
-      - 8080
+      - 8000
     ports:
-      - 8080:8080
+      - 8000:8000
 volumes:
   e-learning:
