@@ -14,10 +14,9 @@ export class AuthController {
     private readonly i18nService: I18nService<I18nTranslations>
   ) { }
 
-
   @UseGuards(LocalAuthGuard)
   @Public()
-  @Post('user/login')
+  @Post('login')
   loginUser(@Req() req, @Res({ passthrough: true }) response: Response) {
     return this.authService.login(req.user, response);
   }
