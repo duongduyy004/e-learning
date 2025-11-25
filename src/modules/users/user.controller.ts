@@ -39,6 +39,11 @@ export class UsersController {
         return this.usersService.updateUser(userId, updateUserDto);
     }
 
+    @Delete(':userId')
+    softDeleteUser(@Param('userId') userId: User['id']) {
+        return this.usersService.softDeleteUser(userId);
+    }
+
     @Patch('avatar')
     uploadAvatar(@Body() uploadavatarDto: UploadAvatarDto, @UserInfo() user: User) {
         return this.usersService.uploadAvatar(uploadavatarDto.imageUrl, uploadavatarDto.publicId, user);

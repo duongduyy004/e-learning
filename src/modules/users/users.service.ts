@@ -168,4 +168,8 @@ export class UsersService {
     return result
   }
 
+  async softDeleteUser(userId: User['id']) {
+    return this.userRepository.softDelete({ id: userId })
+  }
+
 }
