@@ -27,7 +27,7 @@ import { ClsModule } from 'nestjs-cls';
 import { FilesModule } from './modules/files/files.module';
 import { RolesGuard } from 'modules/roles/roles.guard';
 import { DataSource } from 'typeorm';
-import { HttpModule } from '@nestjs/axios';
+import mailerConfig from 'config/configs/mailer.config';
 
 @Module({
   imports: [
@@ -38,6 +38,7 @@ import { HttpModule } from '@nestjs/axios';
         appConfig,
         jwtConfig,
         cloudinaryConfig,
+        mailerConfig
       ],
       envFilePath: ['.env'],
     }),

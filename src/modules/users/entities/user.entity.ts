@@ -36,6 +36,9 @@ export class UserEntity {
   @Column({ nullable: true })
   refreshToken: string;
 
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
   @CreateDateColumn({ type: "timestamp" })
   createdAt: Date;
 

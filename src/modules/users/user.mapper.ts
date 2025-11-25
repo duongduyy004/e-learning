@@ -10,6 +10,7 @@ export class UserMapper {
         domainEntity.email = raw.email;
         domainEntity.gender = raw.gender;
         domainEntity.dayOfBirth = raw.dayOfBirth;
+        domainEntity.isEmailVerified = raw.isEmailVerified;
         if (raw.role) {
             domainEntity.role = {
                 id: raw.role.id,
