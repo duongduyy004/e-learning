@@ -19,18 +19,8 @@ export class AuthController {
   @Public()
   @Post('user/login')
   loginUser(@Req() req, @Res({ passthrough: true }) response: Response) {
-    if (
-      req.user &&
-      req.user.role &&
-      req?.user?.role?.id !== RoleEnum.parent &&
-      req?.user?.role?.id !== RoleEnum.student
-    ) {
-      throw new BadRequestException(this.i18nService.t('auth.INCORRECT'));
-    }
     return this.authService.login(req.user, response);
   }
-
-
 
   @Get('refresh')
   @Public()
