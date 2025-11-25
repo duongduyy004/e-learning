@@ -10,11 +10,13 @@ export class UserMapper {
         domainEntity.email = raw.email;
         domainEntity.gender = raw.gender;
         domainEntity.dayOfBirth = raw.dayOfBirth;
-        domainEntity.role = {
-            id: raw.role.id,
-            name: RoleEnum[raw.role.id],
-            isActive: raw.role.isActive,
-            description: raw.role.description
+        if (raw.role) {
+            domainEntity.role = {
+                id: raw.role.id,
+                name: RoleEnum[raw.role.id],
+                isActive: raw.role.isActive,
+                description: raw.role.description
+            }
         }
 
         return domainEntity
