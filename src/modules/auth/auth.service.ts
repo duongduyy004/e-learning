@@ -3,12 +3,11 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
 import { I18nTranslations } from '@/generated/i18n.generated';
-import * as bcrypt from 'bcrypt'
 import { User } from '../users/user.domain';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from '@/config/config.type';
 import { Response } from 'express';
-import { RoleEnum } from '../roles/roles.enum';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,7 +25,7 @@ export class AuthService {
   }
 
   async login(user: User, response: Response) {
-    const { id, name, email, role, address, gender, dayOfBirth, phone, avatar, publicId } = user
+    const { id, name, email, role, gender, dayOfBirth, avatar, publicId } = user
     const payload = {
       sub: 'token login',
       iss: 'server',
@@ -47,7 +46,7 @@ export class AuthService {
         expiresIn: this.configService.get('jwt.jwt_access_expiration_minutes', { infer: true })
       }),
       user: {
-        id, name, email, role, address, gender, dayOfBirth, phone, avatar, publicId
+        id, name, email, role, gender, dayOfBirth, avatar, publicId
       }
     }
   }
@@ -62,14 +61,10 @@ export class AuthService {
 
   async processNewToken(refreshToken: string, response: Response) {
     try {
-      const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get('jwt.jwt_refresh_secret', { infer: true })
-      })
-
-      const user = await this.usersService.findUserByToken(payload.role, refreshToken)
+      const user = await this.usersService.findUserByToken(refreshToken)
 
       if (user) {
-        const { id, name, email, role, address, gender, dayOfBirth, phone } = user
+        const { id, name, email, role, gender, dayOfBirth } = user
         const payload = {
           sub: 'token login',
           iss: 'server',
@@ -91,7 +86,7 @@ export class AuthService {
             expiresIn: this.configService.get('jwt.jwt_access_expiration_minutes', { infer: true })
           }),
           user: {
-            id, name, email, role, address, gender, dayOfBirth, phone
+            id, name, email, role, gender, dayOfBirth
           }
         }
       } else {

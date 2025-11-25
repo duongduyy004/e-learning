@@ -21,21 +21,16 @@ export class UsersService {
   ) { }
 
   async isEmailExist(email: string): Promise<boolean> {
-    const [user] = await Promise.all([
-      this.userRepository.createQueryBuilder('user')
-        .where('user.email = :email', { email })
-        .getExists()
-    ])
-
-    return user;
+    return await this.userRepository.exists({
+      where: { email }
+    })
   }
 
-  async findByEmail(email: string): Promise<UserEntity | null> {
-    const [user] = await Promise.all([
-      this.userRepository.findOne({ where: { email }, relations: ['role'] })
-    ]);
-
-    return user;
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: { email }
+    })
+    return UserMapper.toDomain(user);
   }
 
   isValidPassword(password: string, hash: string): Promise<boolean> {
@@ -45,7 +40,7 @@ export class UsersService {
   async createAdmin(createUserDto: CreateUserDto): Promise<User> {
     await this.isEmailExist(createUserDto.email);
     const newEntity = await this.userRepository.save(
-      this.userRepository.create({ ...createUserDto, role: { id: RoleEnum.admin } } as UserEntity)
+      this.userRepository.create({ ...createUserDto, role: { id: RoleEnum.admin } })
     );
     return UserMapper.toDomain(newEntity);
   }
@@ -63,15 +58,11 @@ export class UsersService {
     }
   }
 
-  async findUserByToken(role: any, refreshToken: string): Promise<UserEntity | null> {
-    const roleId = role?.id;
-
-    const repositoryMap: Record<string, Repository<any>> = {
-      [RoleEnum.admin]: this.userRepository,
-    };
-
-    const repository = repositoryMap[roleId];
-    return repository ? await repository.findOne({ where: { refreshToken }, relations: ['role'] }) : null;
+  async findUserByToken(refreshToken: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: { refreshToken }
+    })
+    return UserMapper.toDomain(user);
   }
 
   async uploadAvatar(imageUrl: string, publicId: string, user: User): Promise<void> {
@@ -112,39 +103,9 @@ export class UsersService {
     return user;
   }
 
-  async assignRole(userId: string, roleId: RoleEnum): Promise<UserEntity> {
-    // Find the user in all possible tables
-    const user = await this.findUserById(userId);
-
-    if (!user) {
-      throw new NotFoundException(this.i18nService.t('user.FAIL.NOT_FOUND'));
-    }
-
-    // Get the current role to determine which repository to use
-    const currentRoleId = user.role?.id;
-
-    const repositoryMap: Record<string, Repository<any>> = {
-      [RoleEnum.admin]: this.userRepository,
-    };
-
-    const repository = repositoryMap[currentRoleId] || this.userRepository;
-
-    if (!repository) {
-      throw new BadRequestException('Invalid current role');
-    }
-
-    // Update the role
-    await repository.update(
-      { id: userId },
-      { role: { id: roleId } }
-    );
-
-    // Fetch and return the updated user
-    const updatedUser = await repository.findOne({
-      where: { id: userId },
-      relations: ['role']
-    });
-
-    return updatedUser;
+  async createUser(createUserDto: CreateUserDto) {
+    return this.userRepository.save(
+      this.userRepository.create({ ...createUserDto, role: { id: createUserDto.roleId } })
+    )
   }
 }

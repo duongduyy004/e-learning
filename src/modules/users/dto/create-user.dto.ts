@@ -3,7 +3,6 @@ import { PASSWORD_REGEX } from "utils/constants";
 import { Transform } from "class-transformer";
 import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsString, Matches } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
-import { RoleDto } from "@/modules/roles/dto/role.dto";
 import { Role } from "@/modules/roles/role.domain";
 
 export class CreateUserDto {
@@ -30,16 +29,13 @@ export class CreateUserDto {
     @Transform(({ value }) => {
         if (!value) return undefined;
 
-        // Handle MM/DD/YYYY format
         const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
         const match = value.match(dateRegex);
 
         if (match) {
             const [, month, day, year] = match;
-            // Create date with month-1 because JavaScript months are 0-indexed
             const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
 
-            // Validate the date is actually valid
             if (date.getFullYear() == year &&
                 date.getMonth() == month - 1 &&
                 date.getDate() == day) {
@@ -47,7 +43,6 @@ export class CreateUserDto {
             }
         }
 
-        // Fallback: try to parse as standard date
         const fallbackDate = new Date(value);
         if (isNaN(fallbackDate.getTime())) {
             throw new Error('Invalid date format. Expected MM/DD/YYYY or valid date string');
@@ -57,13 +52,5 @@ export class CreateUserDto {
     })
     dayOfBirth: Date;
 
-    @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>('validation.NOT_EMPTY') })
-    @IsString()
-    address: string;
-
-    @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>('validation.NOT_EMPTY') })
-    @IsString()
-    phone: string;
-
-    role: Role;
+    roleId: Role['id'];
 }

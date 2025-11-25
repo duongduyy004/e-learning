@@ -1,5 +1,5 @@
 import { Exclude } from "class-transformer";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { RoleEntity } from "@/modules/roles/entities/role.entity";
 
@@ -24,12 +24,6 @@ export class UserEntity {
   @Column()
   dayOfBirth: Date;
 
-  @Column()
-  address: string;
-
-  @Column()
-  phone: string;
-
   @Column({ nullable: true })
   avatar?: string;
 
@@ -42,16 +36,13 @@ export class UserEntity {
   @Column({ nullable: true })
   refreshToken: string;
 
-  @Column({ default: false })
-  isEmailVerified: boolean
-
   @CreateDateColumn({ type: "timestamp" })
   createdAt: Date;
 
   @UpdateDateColumn({ type: "timestamp" })
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ type: 'timestamp' })
   deletedAt?: Date;
 
   @BeforeInsert()

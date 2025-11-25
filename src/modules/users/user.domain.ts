@@ -15,10 +15,6 @@ export class User {
 
     dayOfBirth: Date;
 
-    address: string;
-
-    phone: string;
-
     avatar?: string;
 
     publicId?: string;

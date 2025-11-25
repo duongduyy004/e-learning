@@ -30,20 +30,6 @@ export class AuthController {
     return this.authService.login(req.user, response);
   }
 
-  @UseGuards(LocalAuthGuard)
-  @Public()
-  @Post('admin/login')
-  loginAdmin(@Req() req, @Res({ passthrough: true }) response: Response) {
-    if (
-      req.user &&
-      req.user.role &&
-      req?.user?.role?.id !== RoleEnum.admin &&
-      req?.user?.role?.id !== RoleEnum.teacher
-    ) {
-      throw new BadRequestException(this.i18nService.t('auth.INCORRECT'));
-    }
-    return this.authService.login(req.user, response)
-  }
 
 
   @Get('refresh')
