@@ -35,6 +35,10 @@ export class AuthService {
     })
   }
 
+  async logout(user: User) {
+    return await this.usersService.removeRefreshToken(user.id)
+  }
+
   async login(user: User, response: Response) {
     const { id, name, email, role, gender, dayOfBirth, avatar, publicId } = user
     const payload = {

@@ -28,6 +28,11 @@ export class AuthController {
     return this.authService.login(req.user, response);
   }
 
+  @Get('logout')
+  logout(@Req() req) {
+    return this.authService.logout(req.user);
+  }
+
   @Get('refresh')
   @Public()
   getRefreshToken(@Req() req: Request, @Res({ passthrough: true }) response: Response) {

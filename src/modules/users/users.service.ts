@@ -67,6 +67,7 @@ export class UsersService {
     const user = await this.userRepository.findOne({
       where: { refreshToken }
     })
+    if (!user) return null;
     return UserMapper.toDomain(user);
   }
 
@@ -172,4 +173,8 @@ export class UsersService {
     return this.userRepository.softDelete({ id: userId })
   }
 
+
+  async removeRefreshToken(userId: User['id']) {
+    return await this.userRepository.update({ id: userId }, { refreshToken: null })
+  }
 }
