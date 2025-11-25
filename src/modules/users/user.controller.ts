@@ -6,6 +6,7 @@ import { User } from "./user.domain";
 import { UploadAvatarDto } from "./dto/upload-avatar.dto";
 import { QueryDto } from "utils/types/query.dto";
 import { FilterUsersDto, SortUsersDto } from "./dto/query-users.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Controller('user')
 export class UsersController {
@@ -26,6 +27,11 @@ export class UsersController {
                 page: queryDto.page
             }
         })
+    }
+
+    @Patch(':userId')
+    updateUser(@Param('userId') userId: User['id'], @Body() updateUserDto: UpdateUserDto) {
+        return this.usersService.updateUser(userId, updateUserDto);
     }
 
     @Patch('avatar')

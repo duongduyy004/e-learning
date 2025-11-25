@@ -13,6 +13,7 @@ import { FilesService } from 'modules/files/files.service';
 import { FilterUsersDto, SortUsersDto } from './dto/query-users.dto';
 import { IPaginationOptions } from 'utils/types/pagination-options';
 import { PaginationResponseDto } from 'utils/types/pagination-response.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -153,4 +154,10 @@ export class UsersService {
       result: entities.map(UserMapper.toDomain),
     };
   }
+
+  async updateUser(userId: User['id'], updateUserDto: UpdateUserDto) {
+    const result = await this.userRepository.update({ id: userId }, updateUserDto);
+    return result
+  }
+
 }
