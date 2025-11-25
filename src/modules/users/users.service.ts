@@ -30,6 +30,7 @@ export class UsersService {
     const user = await this.userRepository.findOne({
       where: { email }
     })
+    if (!user) throw new BadRequestException('User not found')
     return UserMapper.toDomain(user);
   }
 
