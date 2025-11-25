@@ -30,7 +30,7 @@ export class UserEntity {
   @Column({ nullable: true })
   publicId: string;
 
-  @ManyToOne(() => RoleEntity, { eager: true })
+  @ManyToOne(() => RoleEntity, { eager: true, nullable: true })
   role: RoleEntity;
 
   @Column({ nullable: true })

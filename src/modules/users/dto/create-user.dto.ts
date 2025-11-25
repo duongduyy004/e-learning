@@ -52,5 +52,5 @@ export class CreateUserDto {
     })
     dayOfBirth: Date;
 
-    roleId: Role['id'];
+    roleId?: Role['id'];
 }

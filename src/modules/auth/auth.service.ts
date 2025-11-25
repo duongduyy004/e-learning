@@ -7,6 +7,7 @@ import { User } from '../users/user.domain';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from '@/config/config.type';
 import { Response } from 'express';
+import { SignUpDto } from './dto/sign-up.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,16 @@ export class AuthService {
     const isValid = this.usersService.isValidPassword(pass, user?.password || '')
     if (isValid) return user;
     return null;
+  }
+
+  async signUp(signupDto: SignUpDto) {
+    return this.usersService.createUser({
+      email: signupDto.email,
+      name: signupDto.name,
+      password: signupDto.password,
+      dayOfBirth: signupDto.dayOfBirth,
+      gender: signupDto.gender
+    })
   }
 
   async login(user: User, response: Response) {
