@@ -155,6 +155,14 @@ export class UsersService {
     };
   }
 
+  async getUser(userId: User['id']) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId }
+    })
+    if (!user) throw new BadRequestException('User not found')
+    return UserMapper.toDomain(user);
+  }
+
   async updateUser(userId: User['id'], updateUserDto: UpdateUserDto) {
     const result = await this.userRepository.update({ id: userId }, updateUserDto);
     return result

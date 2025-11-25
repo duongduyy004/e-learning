@@ -29,6 +29,11 @@ export class UsersController {
         })
     }
 
+    @Get(':userId')
+    getUserById(@Param('userId') userId: User['id']) {
+        return this.usersService.getUser(userId)
+    }
+
     @Patch(':userId')
     updateUser(@Param('userId') userId: User['id'], @Body() updateUserDto: UpdateUserDto) {
         return this.usersService.updateUser(userId, updateUserDto);
