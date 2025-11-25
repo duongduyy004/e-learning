@@ -5,8 +5,8 @@ import { RoleEntity } from "@/modules/roles/entities/role.entity";
 
 @Entity('user')
 export class UserEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('increment')
+  id: number;
 
   @Column()
   name: string;

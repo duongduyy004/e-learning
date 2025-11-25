@@ -3,13 +3,16 @@ import { I18nService } from 'nestjs-i18n';
 import { I18nTranslations } from '@/generated/i18n.generated';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'modules/users/entities/user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, FindOptionsWhere, ILike, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RoleEnum } from 'modules/roles/roles.enum';
 import { UserMapper } from './user.mapper';
 import { User } from './user.domain';
 import { FilesService } from 'modules/files/files.service';
+import { FilterUsersDto, SortUsersDto } from './dto/query-users.dto';
+import { IPaginationOptions } from 'utils/types/pagination-options';
+import { PaginationResponseDto } from 'utils/types/pagination-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -108,5 +111,46 @@ export class UsersService {
     return this.userRepository.save(
       this.userRepository.create({ ...createUserDto, role: { id: createUserDto.roleId } })
     )
+  }
+
+  async getUsers({
+    filterOptions,
+    sortOptions,
+    paginationOptions
+  }:
+    {
+      filterOptions?: FilterUsersDto,
+      sortOptions?: SortUsersDto[],
+      paginationOptions: IPaginationOptions
+    }): Promise<PaginationResponseDto<User>> {
+
+    const where: FindOptionsWhere<UserEntity> = {};
+
+    if (filterOptions?.name) {
+      where.name = ILike(`%${filterOptions.name}%`);
+    }
+
+    const [entities, total] = await this.userRepository.findAndCount({
+      skip: (paginationOptions.page - 1) * paginationOptions.limit,
+      take: paginationOptions.limit,
+      where,
+      order: sortOptions?.reduce(
+        (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
+        {},
+      ),
+    });
+
+    const totalItems = total;
+    const totalPages = Math.ceil(totalItems / paginationOptions.limit);
+
+    return {
+      meta: {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+        totalPages,
+        totalItems,
+      },
+      result: entities.map(UserMapper.toDomain),
+    };
   }
 }

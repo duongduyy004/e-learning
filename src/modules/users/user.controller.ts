@@ -1,10 +1,11 @@
-import { Body, Controller, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { Public } from "@/decorator/customize.decorator";
 import { UserInfo } from "@/decorator/customize.decorator";
 import { User } from "./user.domain";
 import { UploadAvatarDto } from "./dto/upload-avatar.dto";
+import { QueryDto } from "utils/types/query.dto";
+import { FilterUsersDto, SortUsersDto } from "./dto/query-users.dto";
 
 @Controller('user')
 export class UsersController {
@@ -15,10 +16,16 @@ export class UsersController {
         return this.usersService.createUser(createUserDto);
     }
 
-    @Post('admin')
-    @Public()
-    createAdmin(@Body() createUserDto: CreateUserDto) {
-        return this.usersService.createAdmin(createUserDto)
+    @Get()
+    getUsers(@Query() queryDto: QueryDto<FilterUsersDto, SortUsersDto>) {
+        return this.usersService.getUsers({
+            filterOptions: queryDto.filters,
+            sortOptions: queryDto.sort,
+            paginationOptions: {
+                limit: queryDto.limit,
+                page: queryDto.page
+            }
+        })
     }
 
     @Patch('avatar')
