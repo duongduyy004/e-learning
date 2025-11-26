@@ -30,16 +30,16 @@ export class UsersService {
     })
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.userRepository.findOne({
       where: { email }
     })
     if (!user) throw new BadRequestException('User not found')
-    return UserMapper.toDomain(user);
+    return user
   }
 
-  isValidPassword(password: string, hash: string): boolean {
-    return bcrypt.compareSync(password, hash);
+  isValidPassword(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
   }
 
   async createAdmin(createUserDto: CreateUserDto): Promise<User> {

@@ -23,7 +23,7 @@ export class AuthService {
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
-    const isValid = this.usersService.isValidPassword(pass, user?.password || '')
+    const isValid = await this.usersService.isValidPassword(pass, user?.password || '')
     if (isValid) return user;
     return null;
   }
