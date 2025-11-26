@@ -29,6 +29,7 @@ import { RolesGuard } from 'modules/roles/roles.guard';
 import { DataSource } from 'typeorm';
 import mailerConfig from 'config/configs/mailer.config';
 import { MailerModule } from 'modules/mailer/mailer.module';
+import { MailModule } from 'modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -76,7 +77,8 @@ import { MailerModule } from 'modules/mailer/mailer.module';
     UsersModule,
     AuthModule,
     FilesModule,
-    MailerModule
+    MailerModule,
+    MailModule
   ],
   controllers: [AppController],
   providers: [

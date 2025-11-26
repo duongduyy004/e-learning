@@ -19,7 +19,10 @@ export class MailerService {
       port: this.configService.get('mailer.port', { infer: true }),
       ignoreTLS: this.configService.get('mailer.ignoreTls', { infer: true }),
       secure: this.configService.get('mailer.secure', { infer: true }),
-      requireTLS: this.configService.get('mailer.requireTls', { infer: true })
+      requireTLS: this.configService.get('mailer.requireTls', { infer: true }),
+      tls: {
+        rejectUnauthorized: false
+      }
     })
   }
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from '@/config/config.type';
 import { Response } from 'express';
 import { SignUpDto } from './dto/sign-up.dto';
+import { MailService } from 'modules/mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,8 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private i18nService: I18nService<I18nTranslations>,
-    private configService: ConfigService<AllConfigType>
+    private configService: ConfigService<AllConfigType>,
+    private readonly mailService: MailService
   ) { }
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -113,6 +115,36 @@ export class AuthService {
       }
     } catch (error) {
       throw new BadRequestException(error.message)
+    }
+  }
+
+  async sendVerifyEmail(user: User) {
+    const token = this.jwtService.sign({
+      id: user.id,
+      name: user.name,
+      email: user.email
+    },
+      {
+        secret: this.configService.get('jwt.jwt_confirm_email_secret', { infer: true }),
+        expiresIn: this.configService.get('jwt.jwt_verify_email_expiration_minutes', { infer: true })
+      }
+    )
+    return this.mailService.verifyEmail({
+      to: user.email,
+      data: { token }
+    })
+  }
+
+  async verifyEmail(token: string) {
+    try {
+      const isValidToken = this.jwtService.verify(token, {
+        secret: this.configService.get('jwt.jwt_confirm_email_secret', { infer: true })
+      })
+
+      if (!isValidToken) return false;
+      return 'valid token'
+    } catch (error) {
+      throw new BadRequestException('Invalid token')
     }
   }
 }

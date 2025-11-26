@@ -9,102 +9,8 @@ export type I18nTranslations = {
         "UNAUTHORIZED": string;
         "INCORRECT": string;
     };
-    "class": {
-        "SUCCESS": {
-            "CREATE_A_CLASS": string;
-            "GET_A_CLASS": string;
-            "GET_CLASS_PAGINATION": string;
-            "UPDATE_A_CLASS": string;
-            "DELETE_A_CLASS": string;
-            "ASSIGN_TEACHER": string;
-            "UNASSIGN_TEACHER": string;
-            "ADD_STUDENTS": string;
-            "REMOVE_STUDENTS": string;
-            "GET_AVAILABLE_STUDENTS": string;
-            "GET_CLASS_BANNER_INFO": string;
-            "GET_PUBLIC_CLASSES": string;
-        };
-        "FAIL": {
-            "NOT_FOUND": string;
-            "TEACHER_ALREADY_ASSIGNED": string;
-            "TEACHER_NOT_ASSIGNED": string;
-            "STUDENT_ALREADY_IN_CLASS": string;
-            "SCHEDULE_CONFLICT": string;
-            "CAN_NOT_GET_CLASS_BANNER_INFO": string;
-            "CAN_NOT_GET_PUBLIC_CLASSES": string;
-        };
-    };
     "common": {
         "NOT_FOUND": string;
-    };
-    "cron": {
-        "SUCCESS": {
-            "UPDATE_CLASS_STATUS": string;
-        };
-        "FAIL": {
-            "UPDATE_CLASS_STATUS_FAIL": string;
-        };
-    };
-    "dashboard": {
-        "SUCCESS": {
-            "GET_ADMIN_DASHBOARD": string;
-            "GET_TEACHER_DASHBOARD": string;
-            "GET_STUDENT_DASHBOARD": string;
-            "GET_PARENT_DASHBOARD": string;
-        };
-        "FAIL": {
-            "CAN_NOT_FETCH_ADMIN_DASHBOARD": string;
-            "CAN_NOT_FETCH_TEACHER_DASHBOARD": string;
-            "CAN_NOT_FETCH_STUDENT_DASHBOARD": string;
-            "CAN_NOT_FETCH_PARENT_DASHBOARD": string;
-        };
-    };
-    "registration": {
-        "SUCCESS": {
-            "CREATE_A_REGISTRATION": string;
-            "UPDATE_A_REGISTRATION": string;
-            "DELETE_A_REGISTRATION": string;
-            "GET_A_REGISTRATION": string;
-            "GET_ALL_REGISTRATIONS": string;
-        };
-        "FAIL": {
-            "NOT_FOUND": string;
-            "CAN_NOT_DELETE": string;
-            "ALREADY_PROCESSED": string;
-        };
-    };
-    "student": {
-        "SUCCESS": {
-            "CREATE_A_STUDENT": string;
-            "GET_A_STUDENT": string;
-            "GET_STUDENT_PAGINATION": string;
-            "UPDATE_A_STUDENT": string;
-            "DELETE_A_STUDENT": string;
-        };
-        "FAIL": {
-            "NOT_FOUND": string;
-            "EMAIL_EXIST": string;
-        };
-    };
-    "teacherPayment": {
-        "SUCCESS": {
-            "AUTO_TEACHER_PAYMENT": string;
-            "MANUAL_TEACHER_PAYMENT": string;
-            "UPDATE_TEACHER_PAYMENT": string;
-            "DELETE_TEACHER_PAYMENT": string;
-            "GET_ALL_TEACHER_PAYMENTS": string;
-            "GET_TEACHER_PAYMENT_BY_ID": string;
-        };
-        "FAIL": {
-            "AUTO_TEACHER_PAYMENT": string;
-            "MANUAL_TEACHER_PAYMENT": string;
-            "UPDATE_TEACHER_PAYMENT": string;
-            "DELETE_TEACHER_PAYMENT": string;
-            "CLASS_TEACHER_NOT_FOUND": string;
-            "PAYMENT_NOT_FOUND": string;
-            "EXCEED_AMOUNT": string;
-            "PAYMENT_ALREADY_COMPLETED": string;
-        };
     };
     "user": {
         "SUCCESS": {
@@ -130,6 +36,27 @@ export type I18nTranslations = {
         "MIN_VALUE": string;
         "MAX_VALUE": string;
         "INVALID_ENUM_VALUE": string;
+    };
+    "verify-email": {
+        "TITLE": string;
+        "GREETING": string;
+        "TEXT_1": string;
+        "TEXT_2": string;
+        "TEXT_3": string;
+        "ACTION_TITLE": string;
+        "BUTTON_NOT_WORKING": string;
+        "COPY_LINK": string;
+        "FOOTER_TEXT_1": string;
+        "FOOTER_TEXT_2": string;
+        "SUCCESS": {
+            "VERIFIED": string;
+            "WELCOME": string;
+        };
+        "FAIL": {
+            "INVALID_TOKEN": string;
+            "ALREADY_VERIFIED": string;
+            "EXPIRED": string;
+        };
     };
 };
 /* prettier-ignore */
