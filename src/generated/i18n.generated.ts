@@ -12,6 +12,14 @@ export type I18nTranslations = {
     "common": {
         "NOT_FOUND": string;
     };
+    "forgot-password": {
+        "TITLE": string;
+        "TEXT_1": string;
+        "TEXT_2": string;
+        "TEXT_3": string;
+        "TEXT_4": string;
+        "ACTION_TITLE": string;
+    };
     "user": {
         "SUCCESS": {
             "CREATE_A_USER": string;
