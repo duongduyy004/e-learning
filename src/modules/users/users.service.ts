@@ -177,4 +177,10 @@ export class UsersService {
   async removeRefreshToken(userId: User['id']) {
     return await this.userRepository.update({ id: userId }, { refreshToken: null })
   }
+
+  async resetPassword(email: string, newPassword: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    user.password = newPassword
+    return await this.userRepository.save(user)
+  }
 }

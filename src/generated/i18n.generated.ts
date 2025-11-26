@@ -8,6 +8,7 @@ export type I18nTranslations = {
     "auth": {
         "UNAUTHORIZED": string;
         "INCORRECT": string;
+        "EMAIL_NOT_EXIST": string;
     };
     "common": {
         "NOT_FOUND": string;

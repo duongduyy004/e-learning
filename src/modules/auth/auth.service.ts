@@ -9,6 +9,7 @@ import { AllConfigType } from '@/config/config.type';
 import { Response } from 'express';
 import { SignUpDto } from './dto/sign-up.dto';
 import { MailService } from 'modules/mail/mail.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -143,6 +144,40 @@ export class AuthService {
 
       if (!isValidToken) return false;
       return 'valid token'
+    } catch (error) {
+      throw new BadRequestException('Invalid token')
+    }
+  }
+
+  async sendRequestPassword(email: string) {
+    const isEmailExist = await this.usersService.isEmailExist(email);
+
+    if (!isEmailExist) throw new BadRequestException(this.i18nService.t('auth.EMAIL_NOT_EXIST'));
+
+    const token = this.jwtService.sign({
+      email
+    }, {
+      secret: this.configService.get('jwt.jwt_forgot_secret', { infer: true }),
+      expiresIn: this.configService.get('jwt.jwt_reset_password_expiration_minutes', { infer: true })
+    });
+
+    return this.mailService.forgotPassword({
+      data: { token },
+      to: 'lmhttc24@gmail.com'
+    })
+  }
+
+  async resetPassword(token: string, forgotPasswordDto: ForgotPasswordDto) {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get('jwt.jwt_forgot_secret', { infer: true })
+      })
+
+      const { newPassword, confirmPassword } = forgotPasswordDto
+      const { email } = payload;
+      if (newPassword !== confirmPassword) throw new BadRequestException('Password not match')
+
+      return await this.usersService.resetPassword(email, newPassword);
     } catch (error) {
       throw new BadRequestException('Invalid token')
     }

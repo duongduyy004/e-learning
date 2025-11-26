@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Res, UseGuards, BadRequestException, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards, BadRequestException, Body, Query, Patch } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { Public, UserInfo } from '@/decorator/customize.decorator';
@@ -8,6 +8,7 @@ import { I18nTranslations } from '@/generated/i18n.generated';
 import { SignUpDto } from './dto/sign-up.dto';
 import { MailService } from 'modules/mail/mail.service';
 import { User } from 'modules/users/user.domain';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -46,8 +47,23 @@ export class AuthController {
     return this.authService.sendVerifyEmail(user);
   }
 
-  @Post('verify-email')
+  @Patch('verify-email')
   verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
+  }
+
+  @Public()
+  @Post('send-request-password')
+  sendRequestPassword(@Body('email') email: string) {
+    return this.authService.sendRequestPassword(email);
+  }
+
+  @Public()
+  @Patch('reset-password')
+  resetPassword(
+    @Query('token') token: string,
+    @Body() forgotPasswordDto: ForgotPasswordDto
+  ) {
+    return this.authService.resetPassword(token, forgotPasswordDto);
   }
 }
