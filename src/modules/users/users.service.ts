@@ -38,8 +38,8 @@ export class UsersService {
     return UserMapper.toDomain(user);
   }
 
-  isValidPassword(password: string, hash: string): Promise<boolean> {
-    return bcrypt.compare(password, hash);
+  isValidPassword(password: string, hash: string): boolean {
+    return bcrypt.compareSync(password, hash);
   }
 
   async createAdmin(createUserDto: CreateUserDto): Promise<User> {
