@@ -242,7 +242,8 @@ export class AuthService {
         socialId: socialData.id,
         provider: authProvider,
         roleId: role.id,
-        isEmailVerified: true
+        isEmailVerified: true,
+        avatar: socialData.pictureUrl || null,
       });
 
       user = await this.usersService.findUserById(user.id);

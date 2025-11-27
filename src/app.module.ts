@@ -32,6 +32,8 @@ import { MailerModule } from 'modules/mailer/mailer.module';
 import { MailModule } from 'modules/mail/mail.module';
 import { AuthGoogleModule } from 'modules/auth-google/auth-google.module';
 import googleConfig from 'config/configs/google.config';
+import { AuthFacebookModule } from 'modules/auth-facebook/auth-facebook.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -77,9 +79,15 @@ import googleConfig from 'config/configs/google.config';
       global: true,
       middleware: { mount: true },
     }),
+    HttpModule.register({
+      timeout: 5000,
+      maxRedirects: 5,
+      global: true
+    }),
     UsersModule,
     AuthModule,
     AuthGoogleModule,
+    AuthFacebookModule,
     FilesModule,
     MailerModule,
     MailModule
