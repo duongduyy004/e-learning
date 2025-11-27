@@ -34,7 +34,6 @@ export class UsersService {
     const user = await this.userRepository.findOne({
       where: { email }
     })
-    if (!user) throw new BadRequestException('User not found')
     return user
   }
 
@@ -51,16 +50,8 @@ export class UsersService {
   }
 
   async updateUserToken(user: any, refreshToken: string): Promise<void> {
-    const roleId = user.role?.id;
-
-    const updateMap: Record<string, Repository<any>> = {
-      [RoleEnum.admin]: this.userRepository
-    };
-
-    const repository = updateMap[roleId];
-    if (repository) {
-      await repository.update({ id: user.id }, { refreshToken });
-    }
+    await this.userRepository.update({ id: user.id }, { refreshToken });
+    return;
   }
 
   async findUserByToken(refreshToken: string): Promise<User | null> {
@@ -182,5 +173,14 @@ export class UsersService {
     const user = await this.userRepository.findOne({ where: { email } });
     user.password = newPassword
     return await this.userRepository.save(user)
+  }
+
+  async findBySocialIdAndProvider(socialId: string, provider: string): Promise<UserEntity> {
+    return this.userRepository.findOne({
+      where: {
+        socialId,
+        provider
+      }
+    })
   }
 }

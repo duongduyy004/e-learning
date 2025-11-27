@@ -11,13 +11,13 @@ export class User {
     @Exclude({ toPlainOnly: true })
     password?: string
 
-    gender: string;
-
-    dayOfBirth: Date;
-
     avatar?: string;
 
     publicId?: string;
+
+    socialId: string;
+
+    provider: string;
 
     role: Role;
 

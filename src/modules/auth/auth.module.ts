@@ -17,6 +17,7 @@ import { MailerService } from 'modules/mailer/mailer.service';
     JwtModule.register({})
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtRefreshStrategy, LocalStrategy, MailService, MailerService]
+  providers: [AuthService, JwtStrategy, JwtRefreshStrategy, LocalStrategy, MailService, MailerService],
+  exports: [AuthService]
 })
 export class AuthModule { }

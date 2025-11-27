@@ -30,6 +30,8 @@ import { DataSource } from 'typeorm';
 import mailerConfig from 'config/configs/mailer.config';
 import { MailerModule } from 'modules/mailer/mailer.module';
 import { MailModule } from 'modules/mail/mail.module';
+import { AuthGoogleModule } from 'modules/auth-google/auth-google.module';
+import googleConfig from 'config/configs/google.config';
 
 @Module({
   imports: [
@@ -40,7 +42,8 @@ import { MailModule } from 'modules/mail/mail.module';
         appConfig,
         jwtConfig,
         cloudinaryConfig,
-        mailerConfig
+        mailerConfig,
+        googleConfig
       ],
       envFilePath: ['.env'],
     }),
@@ -76,6 +79,7 @@ import { MailModule } from 'modules/mail/mail.module';
     }),
     UsersModule,
     AuthModule,
+    AuthGoogleModule,
     FilesModule,
     MailerModule,
     MailModule

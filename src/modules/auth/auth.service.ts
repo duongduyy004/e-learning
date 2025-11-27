@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
@@ -10,6 +10,11 @@ import { Response } from 'express';
 import { SignUpDto } from './dto/sign-up.dto';
 import { MailService } from 'modules/mail/mail.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { NullableType } from 'utils/types/nullable.type';
+import { SocialInterface } from 'modules/social/social.interface';
+import { RoleEnum } from 'modules/roles/roles.enum';
+import { UserEntity } from 'modules/users/entities/user.entity';
+import { AuthProvidersEnum } from './auth-providers.enum';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +28,25 @@ export class AuthService {
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
+
+    if (user.provider !== AuthProvidersEnum.email) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          email: `needLoginViaProvider:${user.provider}`,
+        },
+      });
+    }
+
+    if (!user.password) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          password: 'incorrectPassword',
+        },
+      });
+    }
+
     const isValid = await this.usersService.isValidPassword(pass, user?.password || '')
     if (isValid) return user;
     return null;
@@ -33,8 +57,6 @@ export class AuthService {
       email: signupDto.email,
       name: signupDto.name,
       password: signupDto.password,
-      dayOfBirth: signupDto.dayOfBirth,
-      gender: signupDto.gender
     })
   }
 
@@ -43,7 +65,7 @@ export class AuthService {
   }
 
   async login(user: User, response: Response) {
-    const { id, name, email, role, gender, dayOfBirth, avatar, publicId } = user
+    const { id, name, email, role, avatar, publicId } = user
     const payload = {
       sub: 'token login',
       iss: 'server',
@@ -64,7 +86,7 @@ export class AuthService {
         expiresIn: this.configService.get('jwt.jwt_access_expiration_minutes', { infer: true })
       }),
       user: {
-        id, name, email, role, gender, dayOfBirth, avatar, publicId
+        id, name, email, role, avatar, publicId
       }
     }
   }
@@ -82,7 +104,7 @@ export class AuthService {
       const user = await this.usersService.findUserByToken(refreshToken)
 
       if (user) {
-        const { id, name, email, role, gender, dayOfBirth } = user
+        const { id, name, email, role, } = user
         const payload = {
           sub: 'token login',
           iss: 'server',
@@ -104,7 +126,7 @@ export class AuthService {
             expiresIn: this.configService.get('jwt.jwt_access_expiration_minutes', { infer: true })
           }),
           user: {
-            id, name, email, role, gender, dayOfBirth
+            id, name, email, role,
           }
         }
       } else {
@@ -180,6 +202,84 @@ export class AuthService {
       return await this.usersService.resetPassword(email, newPassword);
     } catch (error) {
       throw new BadRequestException('Invalid token')
+    }
+  }
+
+  async validateSocialLogin(
+    authProvider: string,
+    socialData: SocialInterface,
+    response: Response
+  ) {
+    let user: NullableType<UserEntity> = null;
+    const socialEmail = socialData.email?.toLowerCase();
+    let userByEmail: NullableType<UserEntity> = null;
+
+    if (socialEmail) {
+      userByEmail = await this.usersService.findByEmail(socialEmail);
+    }
+
+    if (socialData.id) {
+      user = await this.usersService.findBySocialIdAndProvider(socialData.id, authProvider)
+    }
+
+    if (user) {
+      if (socialEmail && !userByEmail) {
+        user.email = socialEmail;
+      }
+      await this.usersService.updateUser(user.id, user);
+    } else if (userByEmail) {
+      user = userByEmail;
+    } else if (socialData.id) {
+      const role = {
+        id: RoleEnum.user,
+      };
+
+      user = await this.usersService.createUser({
+        email: socialEmail ?? null,
+        name: socialData.name,
+        socialId: socialData.id,
+        provider: authProvider,
+        roleId: role.id,
+        isEmailVerified: true
+      });
+
+      user = await this.usersService.findUserById(user.id);
+    }
+
+    if (!user) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          user: 'userNotFound',
+        },
+      });
+    }
+
+    const payload = {
+      email: user.email,
+      name: user.name,
+      id: user.id,
+      role: user.role
+    }
+
+    const { id, name, email, role, avatar, publicId } = user
+
+    const refreshToken = this.createRefreshToken(payload)
+    response.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      maxAge: 2592000 * 1000
+    })
+
+    await this.usersService.updateUserToken(user, refreshToken)
+
+    return {
+      access_token: this.jwtService.sign(payload, {
+        secret: this.configService.get('jwt.jwt_access_secret', { infer: true }),
+        expiresIn: this.configService.get('jwt.jwt_access_expiration_minutes', { infer: true })
+      }),
+      user: {
+        id, name, email, role, avatar, publicId
+      }
     }
   }
 }

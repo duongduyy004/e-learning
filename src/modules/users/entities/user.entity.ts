@@ -2,6 +2,7 @@ import { Exclude } from "class-transformer";
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { RoleEntity } from "@/modules/roles/entities/role.entity";
+import { AuthProvidersEnum } from "modules/auth/auth-providers.enum";
 
 @Entity('user')
 export class UserEntity {
@@ -18,14 +19,14 @@ export class UserEntity {
   @Exclude({ toPlainOnly: true })
   password?: string;
 
-  @Column()
-  gender: string;
-
-  @Column()
-  dayOfBirth: Date;
-
   @Column({ nullable: true })
   avatar?: string;
+
+  @Column({ nullable: true })
+  socialId: string;
+
+  @Column({ default: AuthProvidersEnum.email, nullable: true })
+  provider: string;
 
   @Column({ nullable: true })
   publicId: string;

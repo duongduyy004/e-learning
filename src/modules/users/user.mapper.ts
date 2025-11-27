@@ -8,8 +8,8 @@ export class UserMapper {
         domainEntity.id = raw.id;
         domainEntity.name = raw.name;
         domainEntity.email = raw.email;
-        domainEntity.gender = raw.gender;
-        domainEntity.dayOfBirth = raw.dayOfBirth;
+        domainEntity.socialId = raw.socialId;
+        domainEntity.provider = raw.provider;
         domainEntity.isEmailVerified = raw.isEmailVerified;
         if (raw.role) {
             domainEntity.role = {
