@@ -102,7 +102,7 @@ export class UsersService {
 
   async createUser(createUserDto: CreateUserDto) {
     return this.userRepository.save(
-      this.userRepository.create({ ...createUserDto, role: { id: createUserDto.roleId } })
+      this.userRepository.create({ ...createUserDto, role: { id: createUserDto.roleId || RoleEnum.user } })
     )
   }
 
