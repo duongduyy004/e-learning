@@ -103,10 +103,10 @@ import { HttpModule } from '@nestjs/axios';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: RolesGuard,
+    // },
     {
       provide: APP_INTERCEPTOR,
       useClass: HttpLoggerInterceptor,
