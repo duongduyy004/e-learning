@@ -20,6 +20,7 @@ export type I18nTranslations = {
         "TEXT_3": string;
         "TEXT_4": string;
         "ACTION_TITLE": string;
+        "EMAIL_NOT_VERIFIED": string;
     };
     "user": {
         "SUCCESS": {

@@ -172,9 +172,11 @@ export class AuthService {
   }
 
   async sendRequestPassword(email: string) {
-    const isEmailExist = await this.usersService.isEmailExist(email);
+    const user = await this.usersService.findByEmail(email);
 
-    if (!isEmailExist) throw new BadRequestException(this.i18nService.t('auth.EMAIL_NOT_EXIST'));
+    if (!user) throw new BadRequestException(this.i18nService.t('auth.EMAIL_NOT_EXIST'));
+
+    if (!user.isEmailVerified) throw new UnprocessableEntityException(this.i18nService.t('forgot-password.EMAIL_NOT_VERIFIED'))
 
     const token = this.jwtService.sign({
       email
