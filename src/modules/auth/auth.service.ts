@@ -187,7 +187,7 @@ export class AuthService {
 
     return this.mailService.forgotPassword({
       data: { token },
-      to: 'lmhttc24@gmail.com'
+      to: user.email
     })
   }
 
