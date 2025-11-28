@@ -210,6 +210,9 @@ export class AuthService {
           infer: true,
         }),
       });
+
+      if (!isValidToken) return false;
+
       const userData = this.jwtService.decode(token);
 
       const { id, email } = userData;
@@ -227,8 +230,6 @@ export class AuthService {
       // Change status of isEmailVerified
       user.isEmailVerified = true;
       const updatedUser = await this.usersService.updateUser(id, user);
-
-      if (!isValidToken) return false;
 
       return { user: updatedUser, result: 'valid token' };
     } catch (error) {
