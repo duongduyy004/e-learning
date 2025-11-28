@@ -270,7 +270,8 @@ export class AuthService {
     const refreshToken = this.createRefreshToken(payload)
     response.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      maxAge: 2592000 * 1000
+      maxAge: 2592000 * 1000,
+      domain: 'asse.devtunnels.ms'
     })
 
     await this.usersService.updateUserToken(user, refreshToken)

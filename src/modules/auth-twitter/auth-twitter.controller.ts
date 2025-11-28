@@ -23,7 +23,11 @@ export class AuthTwitterController {
     async callBackAuth(@Query() query: any, @Res() res: Response) {
         const { code, state } = query
         const socialData = await this.authTwitterService.getProfile(code, state);
-        const data = this.authService.validateSocialLogin(AuthProvidersEnum.twitter, socialData, res);
-        return
+
+        await this.authService.validateSocialLogin(AuthProvidersEnum.twitter, socialData, res);
+
+        const url = new URL('https://4tb7s931-8000.asse.devtunnels.ms/')
+        //set-cookie just at the same domain
+        return res.redirect(url.toString())
     }
 }
