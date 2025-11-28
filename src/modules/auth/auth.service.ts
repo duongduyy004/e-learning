@@ -15,7 +15,6 @@ import { SocialInterface } from 'modules/social/social.interface';
 import { RoleEnum } from 'modules/roles/roles.enum';
 import { UserEntity } from 'modules/users/entities/user.entity';
 import { AuthProvidersEnum } from './auth-providers.enum';
-import { use } from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -232,7 +231,7 @@ export class AuthService {
 
     return this.mailService.forgotPassword({
       data: { token },
-      to: 'lmhttc24@gmail.com'
+      to: user.email
     })
   }
 
