@@ -4,6 +4,7 @@ import { JwtConfig } from './types/jwt-config.type';
 import { CloudinaryConfig } from './types/cloudinary-config.type';
 import { MailerConfig } from './types/mailer-config.type';
 import { GoogleConfig } from './types/google-config.type';
+import { TwitterConfig } from './types/twitter-config.type';
 
 export type AllConfigType = {
     app: AppConfig;
@@ -11,5 +12,6 @@ export type AllConfigType = {
     jwt: JwtConfig;
     cloudinary: CloudinaryConfig,
     mailer: MailerConfig,
-    google: GoogleConfig
+    google: GoogleConfig,
+    twitter: TwitterConfig
 };

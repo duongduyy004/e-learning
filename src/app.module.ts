@@ -34,6 +34,9 @@ import { AuthGoogleModule } from 'modules/auth-google/auth-google.module';
 import googleConfig from 'config/configs/google.config';
 import { AuthFacebookModule } from 'modules/auth-facebook/auth-facebook.module';
 import { HttpModule } from '@nestjs/axios';
+import { AuthTwitterModule } from 'modules/auth-twitter/auth-twitter.module';
+import twitterConfig from 'config/configs/twitter.config';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -45,7 +48,8 @@ import { HttpModule } from '@nestjs/axios';
         jwtConfig,
         cloudinaryConfig,
         mailerConfig,
-        googleConfig
+        googleConfig,
+        twitterConfig
       ],
       envFilePath: ['.env'],
     }),
@@ -84,10 +88,15 @@ import { HttpModule } from '@nestjs/axios';
       maxRedirects: 5,
       global: true
     }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 30 * 1000
+    }),
     UsersModule,
     AuthModule,
     AuthGoogleModule,
     AuthFacebookModule,
+    AuthTwitterModule,
     FilesModule,
     MailerModule,
     MailModule
