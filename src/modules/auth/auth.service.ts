@@ -22,6 +22,8 @@ import { SocialInterface } from 'modules/social/social.interface';
 import { RoleEnum } from 'modules/roles/roles.enum';
 import { UserEntity } from 'modules/users/entities/user.entity';
 import { AuthProvidersEnum } from './auth-providers.enum';
+import { log } from 'console';
+import { UserMapper } from 'modules/users/user.mapper';
 
 @Injectable()
 export class AuthService {
@@ -208,9 +210,27 @@ export class AuthService {
           infer: true,
         }),
       });
+      const userData = this.jwtService.decode(token);
+
+      const { id, email } = userData;
+
+      const user = await this.usersService.findByEmail(email);
+
+      if (!user) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            user: 'userNotFound',
+          },
+        });
+      }
+      // Change status of isEmailVerified
+      user.isEmailVerified = true;
+      const updatedUser = await this.usersService.updateUser(id, user);
 
       if (!isValidToken) return false;
-      return 'valid token';
+
+      return { user: updatedUser, result: 'valid token' };
     } catch (error) {
       throw new BadRequestException('Invalid token');
     }
@@ -244,7 +264,7 @@ export class AuthService {
 
     return this.mailService.forgotPassword({
       data: { token },
-      to: 'lmhttc24@gmail.com',
+      to: email,
     });
   }
 
