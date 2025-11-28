@@ -37,6 +37,10 @@ import { HttpModule } from '@nestjs/axios';
 import { AuthTwitterModule } from 'modules/auth-twitter/auth-twitter.module';
 import twitterConfig from 'config/configs/twitter.config';
 import { CacheModule } from '@nestjs/cache-manager';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { WordsModule } from 'modules/words/words.module';
+import { QuestionsModule } from 'modules/questions/questions.module';
+import { ResultsModule } from 'modules/results/results.module';
 
 @Module({
   imports: [
@@ -99,7 +103,11 @@ import { CacheModule } from '@nestjs/cache-manager';
     AuthTwitterModule,
     FilesModule,
     MailerModule,
-    MailModule
+    MailModule,
+    CategoriesModule,
+    WordsModule,
+    QuestionsModule,
+    ResultsModule
   ],
   controllers: [AppController],
   providers: [

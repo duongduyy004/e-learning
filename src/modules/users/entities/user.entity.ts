@@ -1,8 +1,9 @@
 import { Exclude } from "class-transformer";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn, ManyToMany, JoinTable } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { RoleEntity } from "@/modules/roles/entities/role.entity";
 import { AuthProvidersEnum } from "modules/auth/auth-providers.enum";
+import { WordEntity } from "modules/words/entities/word.entity";
 
 @Entity('user')
 export class UserEntity {
@@ -39,6 +40,10 @@ export class UserEntity {
 
   @Column({ default: false })
   isEmailVerified: boolean;
+
+  @ManyToMany(() => WordEntity)
+  @JoinTable()
+  words: WordEntity[]
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt: Date;
