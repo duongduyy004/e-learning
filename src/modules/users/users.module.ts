@@ -4,11 +4,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from 'modules/users/entities/user.entity';
 import { UsersController } from './user.controller';
 import { FilesService } from 'modules/files/files.service';
+import { RelationshipEntity } from './entities/relationship.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      UserEntity
+      UserEntity,
+      RelationshipEntity
     ])
   ],
   controllers: [UsersController],

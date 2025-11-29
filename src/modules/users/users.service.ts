@@ -14,6 +14,7 @@ import { FilterUsersDto, SortUsersDto } from './dto/query-users.dto';
 import { IPaginationOptions } from 'utils/types/pagination-options';
 import { PaginationResponseDto } from 'utils/types/pagination-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { RelationshipEntity } from './entities/relationship.entity';
 
 @Injectable()
 export class UsersService {
@@ -21,6 +22,7 @@ export class UsersService {
     private readonly i18nService: I18nService<I18nTranslations>,
     private readonly dataSource: DataSource,
     @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
+    @InjectRepository(RelationshipEntity) private relationshipRepository: Repository<RelationshipEntity>,
     private readonly filesService: FilesService
   ) { }
 
@@ -182,5 +184,57 @@ export class UsersService {
         provider
       }
     })
+  }
+
+  async followUser(user: User, userId: User['id']) {
+    if (user.id === userId) throw new BadRequestException('You can not follow yourself');
+
+    const following = await this.userRepository.findOne({ where: { id: userId } });
+    if (!following) throw new BadRequestException('User not found');
+
+    const exists = await this.relationshipRepository.findOne({
+      where: { follower: { id: user.id }, following: { id: userId } }
+    })
+
+    if (exists) throw new BadRequestException("Already following this user");
+
+    const relationship = await this.relationshipRepository.save(
+      this.relationshipRepository.create({ follower: user, following })
+    );
+
+    return relationship;
+
+  }
+
+  async getFollowingUsers(user: User) {
+    const followings = await this.relationshipRepository.find({
+      where: { follower: { id: user.id } },
+      relations: ['following']
+    })
+
+    return {
+      user,
+      followings: followings.map(item => ({
+        id: item.following.id,
+        name: item.following.name,
+        avatar: item.following.avatar
+      }))
+    }
+  }
+
+  async getFollowerUsers(user: User) {
+    const followers = await this.relationshipRepository.find({
+      where: { following: { id: user.id } },
+      relations: ['follower']
+    })
+
+    return {
+      user,
+      followers: followers.map(item => ({
+        id: item.follower.id,
+        name: item.follower.name,
+        avatar: item.follower.avatar
+      }))
+    }
   }
 }

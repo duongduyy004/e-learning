@@ -29,6 +29,16 @@ export class UsersController {
         })
     }
 
+    @Get('following')
+    getFollowingUsers(@UserInfo() user: User) {
+        return this.usersService.getFollowingUsers(user);
+    }
+
+    @Get('follower')
+    getFollowerUsers(@UserInfo() user: User) {
+        return this.usersService.getFollowerUsers(user);
+    }
+
     @Get(':userId')
     getUserById(@Param('userId') userId: User['id']) {
         return this.usersService.getUser(userId)
@@ -47,5 +57,13 @@ export class UsersController {
     @Patch('avatar')
     uploadAvatar(@Body() uploadavatarDto: UploadAvatarDto, @UserInfo() user: User) {
         return this.usersService.uploadAvatar(uploadavatarDto.imageUrl, uploadavatarDto.publicId, user);
+    }
+
+    @Patch('follow/:userId')
+    followUser(
+        @UserInfo() user: User,
+        @Param('userId') userId: User['id']
+    ) {
+        return this.usersService.followUser(user, +userId);
     }
 }
