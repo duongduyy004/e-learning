@@ -229,35 +229,91 @@ export class UsersService {
 
   }
 
-  async getFollowingUsers(user: User) {
-    const followings = await this.relationshipRepository.find({
-      where: { follower: { id: user.id } },
+  async getFollowingUsers(user: User, {
+    filterOptions,
+    sortOptions,
+    paginationOptions
+  }: {
+    filterOptions: FilterUsersDto,
+    sortOptions: SortUsersDto[],
+    paginationOptions: IPaginationOptions
+  }) {
+
+    const where: FindOptionsWhere<UserEntity> = {}
+
+    if (filterOptions?.name) where.name = ILike(`%${filterOptions?.name}%`)
+
+    const [followings, total] = await this.relationshipRepository.findAndCount({
+      where: { follower: { id: user.id }, following: where },
+      skip: (paginationOptions.page - 1) * paginationOptions.limit,
+      take: paginationOptions.limit,
+      order: sortOptions?.reduce(
+        (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
+        {},
+      ),
       relations: ['following']
     })
 
+    const totalItems = total;
+    const totalPages = Math.ceil(totalItems / paginationOptions.limit);
+
     return {
       user,
-      followings: followings.map(item => ({
+      meta: {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+        totalPages,
+        totalItems,
+      },
+      result: followings.map(item => ({
         id: item.following.id,
         name: item.following.name,
         avatar: item.following.avatar
-      }))
+      })),
     }
   }
 
-  async getFollowerUsers(user: User) {
-    const followers = await this.relationshipRepository.find({
-      where: { following: { id: user.id } },
+  async getFollowerUsers(user: User, {
+    filterOptions,
+    sortOptions,
+    paginationOptions
+  }: {
+    filterOptions: FilterUsersDto,
+    sortOptions: SortUsersDto[],
+    paginationOptions: IPaginationOptions
+  }) {
+
+    const where: FindOptionsWhere<UserEntity> = {}
+
+    if (filterOptions?.name) where.name = ILike(`%${filterOptions?.name}%`)
+
+    const [followers, total] = await this.relationshipRepository.findAndCount({
+      where: { following: { id: user.id }, follower: where },
+      skip: (paginationOptions.page - 1) * paginationOptions.limit,
+      take: paginationOptions.limit,
+      order: sortOptions?.reduce(
+        (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
+        {},
+      ),
       relations: ['follower']
     })
 
+    const totalItems = total;
+    const totalPages = Math.ceil(totalItems / paginationOptions.limit);
+
     return {
       user,
-      followers: followers.map(item => ({
+      meta: {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+        totalPages,
+        totalItems,
+      },
+      result: followers.map(item => ({
         id: item.follower.id,
         name: item.follower.name,
         avatar: item.follower.avatar
-      }))
+      })),
     }
   }
 }

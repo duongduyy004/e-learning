@@ -30,13 +30,33 @@ export class UsersController {
     }
 
     @Get('following')
-    getFollowingUsers(@UserInfo() user: User) {
-        return this.usersService.getFollowingUsers(user);
+    getFollowingUsers(
+        @UserInfo() user: User,
+        @Query() queryDto: QueryDto<FilterUsersDto, SortUsersDto>
+    ) {
+        return this.usersService.getFollowingUsers(user, {
+            filterOptions: queryDto.filters,
+            sortOptions: queryDto.sort,
+            paginationOptions: {
+                limit: queryDto.limit,
+                page: queryDto.page
+            }
+        });
     }
 
     @Get('follower')
-    getFollowerUsers(@UserInfo() user: User) {
-        return this.usersService.getFollowerUsers(user);
+    getFollowerUsers(
+        @UserInfo() user: User,
+        @Query() queryDto: QueryDto<FilterUsersDto, SortUsersDto>
+    ) {
+        return this.usersService.getFollowerUsers(user, {
+            filterOptions: queryDto.filters,
+            sortOptions: queryDto.sort,
+            paginationOptions: {
+                limit: queryDto.limit,
+                page: queryDto.page
+            }
+        });
     }
 
     @Get(':userId')
