@@ -66,4 +66,12 @@ export class UsersController {
     ) {
         return this.usersService.followUser(user, +userId);
     }
+
+    @Patch('unfollow/:userId')
+    unFollowUser(
+        @UserInfo() user: User,
+        @Param('userId') userId: User['id']
+    ) {
+        return this.usersService.unFollowUser(user, +userId);
+    }
 }

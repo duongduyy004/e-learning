@@ -202,7 +202,30 @@ export class UsersService {
       this.relationshipRepository.create({ follower: user, following })
     );
 
-    return relationship;
+    return {
+      user,
+      following: {
+        id: relationship.following.id,
+        name: relationship.following.name
+      }
+    };
+
+  }
+
+  async unFollowUser(user: User, userId: User['id']) {
+    const following = await this.userRepository.findOne({ where: { id: userId } });
+    if (!following) throw new BadRequestException('User not found');
+
+    const exists = await this.relationshipRepository.findOne({
+      where: { follower: { id: user.id }, following: { id: userId } }
+    })
+
+    if (!exists) throw new BadRequestException("You do not follow this user");
+
+    return await this.relationshipRepository.delete({
+      follower: { id: user.id },
+      following: { id: userId }
+    })
 
   }
 
