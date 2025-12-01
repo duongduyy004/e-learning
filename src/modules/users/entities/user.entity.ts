@@ -47,10 +47,10 @@ export class UserEntity {
   @OneToMany(() => WordUserEntity, wordUser => wordUser.user)
   wordUser: WordUserEntity[]
 
-  @OneToMany(() => RelationshipEntity, follow => follow.following)
+  @OneToMany(() => RelationshipEntity, (follow) => follow.following)
   followings: RelationshipEntity[];
 
-  @OneToMany(() => RelationshipEntity, follow => follow.follower)
+  @OneToMany(() => RelationshipEntity, (follow) => follow.follower)
   followers: RelationshipEntity[];
 
   @ManyToMany(() => CategoryEntity, category => category.users)
@@ -60,7 +60,7 @@ export class UserEntity {
   @CreateDateColumn({ type: "timestamp" })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp" })
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp' })
@@ -75,5 +75,4 @@ export class UserEntity {
       this.password = await bcrypt.hash(this.password, salt);
     }
   }
-
 }
