@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import { CategoryService } from './categorys.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category } from './category.domain';
@@ -8,21 +8,21 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('category')
 export class CategoryController {
-  constructor(private readonly CategoryService: CategoryService) { }
+  constructor(private readonly categoryService: CategoryService) { }
 
   @Post()
   create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.CategoryService.createCategory(createCategoryDto);
+    return this.categoryService.createCategory(createCategoryDto);
   }
 
   @Get(':categoryId')
   get(@Param('categoryId') id: Category['id']) {
-    return this.CategoryService.getCategory(id)
+    return this.categoryService.getCategory(id)
   }
 
   @Get()
   getAll(@Query() queryDto: QueryDto<FilterCategoryDto, SortCategoryDto>) {
-    return this.CategoryService.getCategories({
+    return this.categoryService.getCategories({
       filterOptions: queryDto.filters,
       sortOptions: queryDto.sort,
       paginationOptions: {
@@ -37,11 +37,11 @@ export class CategoryController {
     @Param('categoryId') id: Category['id'],
     @Body() updateCategoryDto: UpdateCategoryDto
   ) {
-    return this.CategoryService.updateCategory(id, updateCategoryDto);
+    return this.categoryService.updateCategory(id, updateCategoryDto);
   }
 
   @Delete(':categoryId')
   delete(@Param('categoryId') id: Category['id']) {
-    return this.CategoryService.softDeleteCategory(id);
+    return this.categoryService.deleteCategory(id);
   }
 }

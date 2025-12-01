@@ -14,5 +14,6 @@ export class CategoryMapper {
                 meaning: item.meaning
             }))
         }
+        return domainEntity;
     }
 }

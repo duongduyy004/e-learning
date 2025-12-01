@@ -1,5 +1,5 @@
 import { WordEntity } from "modules/words/entities/word.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('category')
 export class CategoryEntity {
@@ -9,6 +9,6 @@ export class CategoryEntity {
     @Column()
     title: string;
 
-    @OneToMany(() => WordEntity, words => words.category)
+    @OneToMany(() => WordEntity, words => words.category, { onDelete: 'CASCADE' })
     words: WordEntity[]
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
 import { FindOptionsWhere, ILike, Repository } from 'typeorm';
@@ -8,18 +8,23 @@ import { FilterCategoryDto, SortCategoryDto } from './dto/quey-category.dto';
 import { IPaginationOptions } from 'utils/types/pagination-options';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { WordsService } from 'modules/words/words.service';
 
 @Injectable()
 export class CategoryService {
     constructor(
         @InjectRepository(CategoryEntity)
-        private categoryRepository: Repository<CategoryEntity>
+        private categoryRepository: Repository<CategoryEntity>,
+        private wordService: WordsService
     ) { }
 
     async createCategory(createCategoryDto: CreateCategoryDto) {
         const category = await this.categoryRepository.save(
-            this.categoryRepository.create(createCategoryDto)
+            this.categoryRepository.create({ title: createCategoryDto.title })
         )
+
+        if (createCategoryDto.words.length > 0)
+            await this.wordService.createWords(createCategoryDto.words, category.id);
         return CategoryMapper.toDomain(category);
     }
 
@@ -34,12 +39,11 @@ export class CategoryService {
         filterOptions,
         sortOptions,
         paginationOptions
-    }:
-        {
-            filterOptions?: FilterCategoryDto,
-            sortOptions?: SortCategoryDto[],
-            paginationOptions: IPaginationOptions
-        }) {
+    }: {
+        filterOptions?: FilterCategoryDto,
+        sortOptions?: SortCategoryDto[],
+        paginationOptions: IPaginationOptions
+    }) {
         const where: FindOptionsWhere<CategoryEntity> = {};
 
         if (filterOptions?.title) {
@@ -71,11 +75,39 @@ export class CategoryService {
     }
 
     async updateCategory(id: Category['id'], updateCategoryDto: UpdateCategoryDto) {
-        return this.categoryRepository.update({ id }, updateCategoryDto)
+        const category = await this.categoryRepository.findOne({ where: { id } });
+
+        if (!category) {
+            throw new NotFoundException('Category not found');
+        }
+
+        // Update category title
+        if (updateCategoryDto.title) {
+            category.title = updateCategoryDto.title;
+        }
+
+        // Add new words
+        if (updateCategoryDto.words?.length > 0) {
+            await this.wordService.createWords(updateCategoryDto.words, id);
+        }
+
+        // Update existing words
+        if (updateCategoryDto.updateWords?.length > 0) {
+            await this.wordService.updateWords(updateCategoryDto.updateWords);
+        }
+
+        // Remove specific words
+        if (updateCategoryDto.removeWordIds?.length > 0) {
+            await this.wordService.removeWords(updateCategoryDto.removeWordIds);
+        }
+
+        await this.categoryRepository.save(category);
+
+        return CategoryMapper.toDomain(category);
     }
 
-    async softDeleteCategory(id: Category['id']) {
-        return this.categoryRepository.softDelete({ id })
+    async deleteCategory(id: Category['id']) {
+        return this.categoryRepository.delete({ id })
     }
 
 }

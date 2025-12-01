@@ -1,5 +1,5 @@
 import { CategoryEntity } from "modules/categories/entities/category.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('word')
 export class WordEntity {
@@ -12,6 +12,6 @@ export class WordEntity {
     @Column()
     meaning: string;
 
-    @ManyToOne(() => CategoryEntity, cate => cate.words)
+    @ManyToOne(() => CategoryEntity, cate => cate.words, { onDelete: 'CASCADE' })
     category: CategoryEntity
 }
