@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { I18nService } from 'nestjs-i18n';
 import { I18nTranslations } from '@/generated/i18n.generated';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,28 +19,31 @@ import { IPaginationOptions } from 'utils/types/pagination-options';
 import { PaginationResponseDto } from 'utils/types/pagination-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RelationshipEntity } from './entities/relationship.entity';
+import { ChangePasswordDto } from './dto/change-pasword.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly i18nService: I18nService<I18nTranslations>,
     private readonly dataSource: DataSource,
-    @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
-    @InjectRepository(RelationshipEntity) private relationshipRepository: Repository<RelationshipEntity>,
-    private readonly filesService: FilesService
-  ) { }
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+    @InjectRepository(RelationshipEntity)
+    private relationshipRepository: Repository<RelationshipEntity>,
+    private readonly filesService: FilesService,
+  ) {}
 
   async isEmailExist(email: string): Promise<boolean> {
     return await this.userRepository.exists({
-      where: { email }
-    })
+      where: { email },
+    });
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.userRepository.findOne({
-      where: { email }
-    })
-    return user
+      where: { email },
+    });
+    return user;
   }
 
   isValidPassword(password: string, hash: string): Promise<boolean> {
@@ -46,7 +53,10 @@ export class UsersService {
   async createAdmin(createUserDto: CreateUserDto): Promise<User> {
     await this.isEmailExist(createUserDto.email);
     const newEntity = await this.userRepository.save(
-      this.userRepository.create({ ...createUserDto, role: { id: RoleEnum.admin } })
+      this.userRepository.create({
+        ...createUserDto,
+        role: { id: RoleEnum.admin },
+      }),
     );
     return UserMapper.toDomain(newEntity);
   }
@@ -58,13 +68,17 @@ export class UsersService {
 
   async findUserByToken(refreshToken: string): Promise<User | null> {
     const user = await this.userRepository.findOne({
-      where: { refreshToken }
-    })
+      where: { refreshToken },
+    });
     if (!user) return null;
     return UserMapper.toDomain(user);
   }
 
-  async uploadAvatar(imageUrl: string, publicId: string, user: User): Promise<void> {
+  async uploadAvatar(
+    imageUrl: string,
+    publicId: string,
+    user: User,
+  ): Promise<void> {
     const roleId = user?.role?.id;
 
     const repositoryMap: Record<string, { repo: Repository<any> }> = {
@@ -82,11 +96,13 @@ export class UsersService {
     if (entity && entity.publicId && entity.avatar) {
       await this.filesService.deleteFile(entity.publicId);
       entity.avatar = null;
-      entity.publicId = null
+      entity.publicId = null;
     }
 
     if (roleId !== RoleEnum.admin && entity.avatar && entity.publicId) {
-      throw new BadRequestException('Avatar already exists. Please delete the current avatar before uploading a new one.');
+      throw new BadRequestException(
+        'Avatar already exists. Please delete the current avatar before uploading a new one.',
+      );
     }
 
     entity.avatar = imageUrl;
@@ -96,7 +112,10 @@ export class UsersService {
 
   async findUserById(userId: User['id']) {
     const [user] = await Promise.all([
-      this.userRepository.findOne({ where: { id: userId }, relations: ['role'] }),
+      this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['role'],
+      }),
     ]);
 
     return user;
@@ -104,21 +123,22 @@ export class UsersService {
 
   async createUser(createUserDto: CreateUserDto) {
     return this.userRepository.save(
-      this.userRepository.create({ ...createUserDto, role: { id: createUserDto.roleId || RoleEnum.user } })
-    )
+      this.userRepository.create({
+        ...createUserDto,
+        role: { id: createUserDto.roleId || RoleEnum.user },
+      }),
+    );
   }
 
   async getUsers({
     filterOptions,
     sortOptions,
-    paginationOptions
-  }:
-    {
-      filterOptions?: FilterUsersDto,
-      sortOptions?: SortUsersDto[],
-      paginationOptions: IPaginationOptions
-    }): Promise<PaginationResponseDto<User>> {
-
+    paginationOptions,
+  }: {
+    filterOptions?: FilterUsersDto;
+    sortOptions?: SortUsersDto[];
+    paginationOptions: IPaginationOptions;
+  }): Promise<PaginationResponseDto<User>> {
     const where: FindOptionsWhere<UserEntity> = {};
 
     if (filterOptions?.name) {
@@ -151,97 +171,136 @@ export class UsersService {
 
   async getUser(userId: User['id']) {
     const user = await this.userRepository.findOne({
-      where: { id: userId }
-    })
-    if (!user) throw new BadRequestException('User not found')
+      where: { id: userId },
+    });
+    if (!user) throw new BadRequestException('User not found');
     return UserMapper.toDomain(user);
   }
 
   async updateUser(userId: User['id'], updateUserDto: UpdateUserDto) {
-    const result = await this.userRepository.update({ id: userId }, updateUserDto);
-    return result
+    const result = await this.userRepository.update(
+      { id: userId },
+      updateUserDto,
+    );
+    return result;
   }
 
   async softDeleteUser(userId: User['id']) {
-    return this.userRepository.softDelete({ id: userId })
+    return this.userRepository.softDelete({ id: userId });
   }
 
-
   async removeRefreshToken(userId: User['id']) {
-    return await this.userRepository.update({ id: userId }, { refreshToken: null })
+    return await this.userRepository.update(
+      { id: userId },
+      { refreshToken: null },
+    );
   }
 
   async resetPassword(email: string, newPassword: string) {
     const user = await this.userRepository.findOne({ where: { email } });
-    user.password = newPassword
-    return await this.userRepository.save(user)
+    user.password = newPassword;
+    return await this.userRepository.save(user);
   }
 
-  async findBySocialIdAndProvider(socialId: string, provider: string): Promise<UserEntity> {
+  async changePassword(userData: User, forgotPasswordDto: ChangePasswordDto) {
+    const { currentPassword, newPassword, confirmPassword } = forgotPasswordDto;
+    const { email } = userData;
+
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
+    const { password } = user;
+    const isValidPassword = await this.isValidPassword(
+      currentPassword,
+      password,
+    );
+
+    if (!isValidPassword)
+      throw new BadRequestException('Current Password is Wrong!');
+
+    if (newPassword !== confirmPassword)
+      throw new BadRequestException('newPassword and confirm does not match');
+
+    user.password = newPassword;
+    await this.userRepository.save(user);
+    return {
+      result: 'Password changed successfully!',
+    };
+  }
+
+  async findBySocialIdAndProvider(
+    socialId: string,
+    provider: string,
+  ): Promise<UserEntity> {
     return this.userRepository.findOne({
       where: {
         socialId,
-        provider
-      }
-    })
+        provider,
+      },
+    });
   }
 
   async followUser(user: User, userId: User['id']) {
-    if (user.id === userId) throw new BadRequestException('You can not follow yourself');
+    if (user.id === userId)
+      throw new BadRequestException('You can not follow yourself');
 
-    const following = await this.userRepository.findOne({ where: { id: userId } });
+    const following = await this.userRepository.findOne({
+      where: { id: userId },
+    });
     if (!following) throw new BadRequestException('User not found');
 
     const exists = await this.relationshipRepository.findOne({
-      where: { follower: { id: user.id }, following: { id: userId } }
-    })
+      where: { follower: { id: user.id }, following: { id: userId } },
+    });
 
-    if (exists) throw new BadRequestException("Already following this user");
+    if (exists) throw new BadRequestException('Already following this user');
 
     const relationship = await this.relationshipRepository.save(
-      this.relationshipRepository.create({ follower: user, following })
+      this.relationshipRepository.create({ follower: user, following }),
     );
 
     return {
       user,
       following: {
         id: relationship.following.id,
-        name: relationship.following.name
-      }
+        name: relationship.following.name,
+      },
     };
-
   }
 
   async unFollowUser(user: User, userId: User['id']) {
-    const following = await this.userRepository.findOne({ where: { id: userId } });
+    const following = await this.userRepository.findOne({
+      where: { id: userId },
+    });
     if (!following) throw new BadRequestException('User not found');
 
     const exists = await this.relationshipRepository.findOne({
-      where: { follower: { id: user.id }, following: { id: userId } }
-    })
+      where: { follower: { id: user.id }, following: { id: userId } },
+    });
 
-    if (!exists) throw new BadRequestException("You do not follow this user");
+    if (!exists) throw new BadRequestException('You do not follow this user');
 
     return await this.relationshipRepository.delete({
       follower: { id: user.id },
-      following: { id: userId }
-    })
-
+      following: { id: userId },
+    });
   }
 
-  async getFollowingUsers(user: User, {
-    filterOptions,
-    sortOptions,
-    paginationOptions
-  }: {
-    filterOptions: FilterUsersDto,
-    sortOptions: SortUsersDto[],
-    paginationOptions: IPaginationOptions
-  }) {
+  async getFollowingUsers(
+    user: User,
+    {
+      filterOptions,
+      sortOptions,
+      paginationOptions,
+    }: {
+      filterOptions: FilterUsersDto;
+      sortOptions: SortUsersDto[];
+      paginationOptions: IPaginationOptions;
+    },
+  ) {
+    const where: FindOptionsWhere<UserEntity> = {};
 
-    const where: FindOptionsWhere<UserEntity> = {}
-
-    if (filterOptions?.name) where.name = ILike(`%${filterOptions?.name}%`)
+    if (filterOptions?.name) where.name = ILike(`%${filterOptions?.name}%`);
 
     const [followings, total] = await this.relationshipRepository.findAndCount({
       where: { follower: { id: user.id }, following: where },
@@ -251,8 +310,8 @@ export class UsersService {
         (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
         {},
       ),
-      relations: ['following']
-    })
+      relations: ['following'],
+    });
 
     const totalItems = total;
     const totalPages = Math.ceil(totalItems / paginationOptions.limit);
@@ -265,27 +324,29 @@ export class UsersService {
         totalPages,
         totalItems,
       },
-      result: followings.map(item => ({
+      result: followings.map((item) => ({
         id: item.following.id,
         name: item.following.name,
-        avatar: item.following.avatar
+        avatar: item.following.avatar,
       })),
-    }
+    };
   }
 
-  async getFollowerUsers(user: User, {
-    filterOptions,
-    sortOptions,
-    paginationOptions
-  }: {
-    filterOptions: FilterUsersDto,
-    sortOptions: SortUsersDto[],
-    paginationOptions: IPaginationOptions
-  }) {
+  async getFollowerUsers(
+    user: User,
+    {
+      filterOptions,
+      sortOptions,
+      paginationOptions,
+    }: {
+      filterOptions: FilterUsersDto;
+      sortOptions: SortUsersDto[];
+      paginationOptions: IPaginationOptions;
+    },
+  ) {
+    const where: FindOptionsWhere<UserEntity> = {};
 
-    const where: FindOptionsWhere<UserEntity> = {}
-
-    if (filterOptions?.name) where.name = ILike(`%${filterOptions?.name}%`)
+    if (filterOptions?.name) where.name = ILike(`%${filterOptions?.name}%`);
 
     const [followers, total] = await this.relationshipRepository.findAndCount({
       where: { following: { id: user.id }, follower: where },
@@ -295,8 +356,8 @@ export class UsersService {
         (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
         {},
       ),
-      relations: ['follower']
-    })
+      relations: ['follower'],
+    });
 
     const totalItems = total;
     const totalPages = Math.ceil(totalItems / paginationOptions.limit);
@@ -309,11 +370,11 @@ export class UsersService {
         totalPages,
         totalItems,
       },
-      result: followers.map(item => ({
+      result: followers.map((item) => ({
         id: item.follower.id,
         name: item.follower.name,
-        avatar: item.follower.avatar
+        avatar: item.follower.avatar,
       })),
-    }
+    };
   }
 }

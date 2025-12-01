@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Req, Res, UseGuards, BadRequestException, Body, Query, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+  BadRequestException,
+  Body,
+  Query,
+  Patch,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { Public, UserInfo } from '@/decorator/customize.decorator';
@@ -9,13 +20,14 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { MailService } from 'modules/mail/mail.service';
 import { User } from 'modules/users/user.domain';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { log } from 'console';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly i18nService: I18nService<I18nTranslations>
-  ) { }
+    private readonly i18nService: I18nService<I18nTranslations>,
+  ) {}
 
   @Public()
   @Post('signup')
@@ -37,9 +49,12 @@ export class AuthController {
 
   @Get('refresh')
   @Public()
-  getRefreshToken(@Req() req: Request, @Res({ passthrough: true }) response: Response) {
-    const { refresh_token } = req.cookies
-    return this.authService.processNewToken(refresh_token, response)
+  getRefreshToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { refresh_token } = req.cookies;
+    return this.authService.processNewToken(refresh_token, response);
   }
 
   @Get('send-verify-email')
@@ -62,7 +77,7 @@ export class AuthController {
   @Patch('reset-password')
   resetPassword(
     @Query('token') token: string,
-    @Body() forgotPasswordDto: ForgotPasswordDto
+    @Body() forgotPasswordDto: ForgotPasswordDto,
   ) {
     return this.authService.resetPassword(token, forgotPasswordDto);
   }
