@@ -1,10 +1,24 @@
-import { Exclude } from "class-transformer";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn, ManyToMany, JoinTable, OneToMany } from "typeorm";
-import * as bcrypt from "bcrypt";
-import { RoleEntity } from "@/modules/roles/entities/role.entity";
-import { AuthProvidersEnum } from "modules/auth/auth-providers.enum";
-import { WordEntity } from "modules/words/entities/word.entity";
-import { RelationshipEntity } from "./relationship.entity";
+import { Exclude } from 'class-transformer';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  BeforeInsert,
+  BeforeUpdate,
+  ManyToOne,
+  JoinColumn,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
+} from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { RoleEntity } from '@/modules/roles/entities/role.entity';
+import { AuthProvidersEnum } from 'modules/auth/auth-providers.enum';
+import { WordEntity } from 'modules/words/entities/word.entity';
+import { RelationshipEntity } from './relationship.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -44,18 +58,18 @@ export class UserEntity {
 
   @ManyToMany(() => WordEntity)
   @JoinTable()
-  words: WordEntity[]
+  words: WordEntity[];
 
-  @OneToMany(() => RelationshipEntity, follow => follow.following)
+  @OneToMany(() => RelationshipEntity, (follow) => follow.following)
   followings: RelationshipEntity[];
 
-  @OneToMany(() => RelationshipEntity, follow => follow.follower)
+  @OneToMany(() => RelationshipEntity, (follow) => follow.follower)
   followers: RelationshipEntity[];
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp" })
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp' })
@@ -70,5 +84,4 @@ export class UserEntity {
       this.password = await bcrypt.hash(this.password, salt);
     }
   }
-
 }
