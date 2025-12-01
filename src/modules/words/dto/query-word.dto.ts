@@ -1,10 +1,29 @@
-import { User } from "modules/users/user.domain";
+import { IsArray, IsEnum, IsInt, IsOptional, IsString } from "class-validator";
 import { Word } from "../word.domain";
+import { Transform } from "class-transformer";
 
 export class FilterWordDto {
-    categoryIds: number[];
-    userId: User['id'];
-    status: string;
+    @IsOptional()
+    @IsString()
+    content: string;
+
+    @IsOptional()
+    @IsString()
+    meaning: string;
+
+    @IsOptional()
+    isLearned?: boolean;
+
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (typeof value === 'string') {
+            return value.split(',').map(id => parseInt(id, 10));
+        }
+        return value;
+    })
+    @IsArray()
+    @IsInt({ each: true })
+    categoryIds?: number[];
 }
 
 export class SortWordDto {

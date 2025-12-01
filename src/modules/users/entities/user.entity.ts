@@ -5,6 +5,8 @@ import { RoleEntity } from "@/modules/roles/entities/role.entity";
 import { AuthProvidersEnum } from "modules/auth/auth-providers.enum";
 import { WordEntity } from "modules/words/entities/word.entity";
 import { RelationshipEntity } from "./relationship.entity";
+import { CategoryEntity } from "modules/categories/entities/category.entity";
+import { WordUserEntity } from "modules/words/entities/word-user.entity";
 
 @Entity('user')
 export class UserEntity {
@@ -42,15 +44,18 @@ export class UserEntity {
   @Column({ default: false })
   isEmailVerified: boolean;
 
-  @ManyToMany(() => WordEntity)
-  @JoinTable()
-  words: WordEntity[]
+  @OneToMany(() => WordUserEntity, wordUser => wordUser.user)
+  wordUser: WordUserEntity[]
 
   @OneToMany(() => RelationshipEntity, follow => follow.following)
   followings: RelationshipEntity[];
 
   @OneToMany(() => RelationshipEntity, follow => follow.follower)
   followers: RelationshipEntity[];
+
+  @ManyToMany(() => CategoryEntity, category => category.users)
+  @JoinTable()
+  categories: CategoryEntity[]
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt: Date;

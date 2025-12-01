@@ -1,5 +1,6 @@
+import { UserEntity } from "modules/users/entities/user.entity";
 import { WordEntity } from "modules/words/entities/word.entity";
-import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('category')
 export class CategoryEntity {
@@ -11,4 +12,7 @@ export class CategoryEntity {
 
     @OneToMany(() => WordEntity, words => words.category, { onDelete: 'CASCADE' })
     words: WordEntity[]
+
+    @ManyToMany(() => UserEntity, user => user.categories)
+    users: UserEntity[]
 }

@@ -32,6 +32,13 @@ export class CategoryController {
     })
   }
 
+  @Patch('add-category')
+  addCategory(
+    @Body() data: { userId: string, categoryId: string }
+  ) {
+    return this.categoryService.addCategoryToUser(+data.userId, +data.categoryId);
+  }
+
   @Patch(':categoryId')
   update(
     @Param('categoryId') id: Category['id'],

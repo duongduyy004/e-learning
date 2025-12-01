@@ -19,7 +19,6 @@ export class UserMapper {
                 description: raw.role.description
             }
         }
-
         return domainEntity
     }
 }

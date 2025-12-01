@@ -65,7 +65,7 @@ export class AuthService {
   }
 
   async login(user: User, response: Response) {
-    const { id, name, email, role, avatar, publicId } = user
+    const { id, name, email, role, avatar, publicId, categories } = user
     const payload = {
       sub: 'token login',
       iss: 'server',
@@ -93,7 +93,7 @@ export class AuthService {
         }),
       }),
       user: {
-        id, name, email, role, avatar, publicId
+        id, name, email, role, avatar, publicId, categories
       }
     }
   }
@@ -113,7 +113,7 @@ export class AuthService {
       const user = await this.usersService.findUserByToken(refreshToken);
 
       if (user) {
-        const { id, name, email, role, } = user
+        const { id, name, email, role, avatar, publicId, categories } = user
         const payload = {
           sub: 'token login',
           iss: 'server',
@@ -143,7 +143,7 @@ export class AuthService {
             ),
           }),
           user: {
-            id, name, email, role,
+            id, name, email, role, avatar, publicId, categories
           }
         }
       } else {

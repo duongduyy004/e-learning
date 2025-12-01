@@ -1,4 +1,5 @@
 import { Exclude } from "class-transformer";
+import { Category } from "modules/categories/category.domain";
 import { Role } from "modules/roles/role.domain";
 
 export class User {
@@ -22,6 +23,8 @@ export class User {
     role: Role;
 
     isEmailVerified: boolean;
+
+    categories: Category[]
 
     createdAt: Date;
 

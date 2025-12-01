@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
-import { FindOptionsWhere, ILike, Repository } from 'typeorm';
+import { DataSource, FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { Category } from './category.domain';
 import { CategoryMapper } from './category.mapper';
 import { FilterCategoryDto, SortCategoryDto } from './dto/quey-category.dto';
@@ -9,13 +9,15 @@ import { IPaginationOptions } from 'utils/types/pagination-options';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { WordsService } from 'modules/words/words.service';
+import { UserEntity } from 'modules/users/entities/user.entity';
 
 @Injectable()
 export class CategoryService {
     constructor(
         @InjectRepository(CategoryEntity)
         private categoryRepository: Repository<CategoryEntity>,
-        private wordService: WordsService
+        private wordService: WordsService,
+        private dataSource: DataSource
     ) { }
 
     async createCategory(createCategoryDto: CreateCategoryDto) {
@@ -110,4 +112,27 @@ export class CategoryService {
         return this.categoryRepository.delete({ id })
     }
 
+    async addCategoryToUser(userId: number, categoryId: number) {
+        return await this.dataSource.transaction(async (manager) => {
+            const user = await manager.findOne(UserEntity, {
+                where: { id: userId },
+                relations: ['categories']
+            });
+
+            const category = await manager.findOneBy(CategoryEntity, { id: categoryId });
+
+            if (!user || !category) {
+                throw new NotFoundException('User or category not found');
+            }
+
+            if (user.categories.some(c => c.id === categoryId)) {
+                throw new BadRequestException('Category already added to user');
+            }
+
+            // Add category to user
+            user.categories.push(category);
+
+            return await manager.save(UserEntity, user);
+        });
+    }
 }
