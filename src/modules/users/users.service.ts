@@ -178,11 +178,11 @@ export class UsersService {
   }
 
   async updateUser(userId: User['id'], updateUserDto: UpdateUserDto) {
-    const result = await this.userRepository.update(
-      { id: userId },
-      updateUserDto,
-    );
-    return result;
+    await this.userRepository.update({ id: userId }, updateUserDto);
+    const updatedUser = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    return updatedUser;
   }
 
   async softDeleteUser(userId: User['id']) {
