@@ -44,7 +44,6 @@ export class UsersController {
     @UserInfo() user: User,
     @Body() fogorPasswordDto: ChangePasswordDto,
   ) {
-    console.log(user);
     return this.usersService.changePassword(user, fogorPasswordDto);
   }
 
@@ -83,6 +82,17 @@ export class UsersController {
     return this.usersService.getUser(userId);
   }
 
+  @Patch('avatar')
+  uploadAvatar(
+    @Body() uploadavatarDto: UploadAvatarDto,
+    @UserInfo() user: User,
+  ) {
+    return this.usersService.uploadAvatar(
+      uploadavatarDto.imageUrl,
+      uploadavatarDto.publicId,
+      user,
+    );
+  }
   @Patch(':userId')
   updateUser(
     @Param('userId') userId: User['id'],
@@ -94,18 +104,6 @@ export class UsersController {
   @Delete(':userId')
   softDeleteUser(@Param('userId') userId: User['id']) {
     return this.usersService.softDeleteUser(userId);
-  }
-
-  @Patch('avatar')
-  uploadAvatar(
-    @Body() uploadavatarDto: UploadAvatarDto,
-    @UserInfo() user: User,
-  ) {
-    return this.usersService.uploadAvatar(
-      uploadavatarDto.imageUrl,
-      uploadavatarDto.publicId,
-      user,
-    );
   }
 
   @Patch('follow/:userId')
