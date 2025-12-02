@@ -13,5 +13,5 @@ export class QuestionChoiceEntity {
     isCorrect: boolean;
 
     @ManyToOne(() => QuestionEntity, question => question.choices)
-    question: QuestionEntity
+    question?: QuestionEntity
 }

@@ -9,31 +9,54 @@ import { IPaginationOptions } from 'utils/types/pagination-options';
 import { Word } from './word.domain';
 import { User } from 'modules/users/user.domain';
 import { WordUserEntity } from './entities/word-user.entity';
+import { QuestionsService } from 'modules/questions/questions.service';
 
 @Injectable()
 export class WordsService {
     constructor(
         @InjectRepository(WordEntity) private wordRepository: Repository<WordEntity>,
         @InjectRepository(WordUserEntity) private wordUserRepository: Repository<WordUserEntity>,
-        private dataSource: DataSource
+        private dataSource: DataSource,
+        private questionsService: QuestionsService
     ) { }
 
     async createWords(createWordDto: CreateWordDto[], categoryId: Category['id']) {
+        let lastQuestionOrder = await this.questionsService.getLastQuestionOrder(categoryId);
         const word = await this.wordRepository.save(
             this.wordRepository.create(createWordDto.map(item => ({
                 content: item.content,
                 meaning: item.meaning,
-                category: { id: categoryId }
-            }))));
-
+                category: { id: categoryId },
+                question: {
+                    order: ++lastQuestionOrder,
+                    choices: item.restChoices
+                        ? [...item.restChoices.map(item => ({
+                            content: item.content, isCorrect: false
+                        })
+                        ), { content: item.meaning, isCorrect: true }]
+                        : [{ content: item.meaning, isCorrect: true }]
+                }
+            })))
+        );
         return word;
     }
 
     async updateWords(words: { id: number; content: string; meaning: string }[]) {
-        const promises = words.map(w =>
-            this.wordRepository.update({ id: w.id }, { content: w.content, meaning: w.meaning })
-        );
-        return Promise.all(promises);
+        const wordEntities = await this.wordRepository.find({
+            where: { id: In(words.map(item => item.id)) },
+            relations: { question: { choices: true } }
+        })
+
+        const updates = wordEntities.map(entity => {
+            const updateData = words.find(w => w.id === entity.id);
+            if (updateData) {
+                entity.content = updateData.content;
+                entity.meaning = updateData.meaning;
+            }
+            return entity;
+        });
+
+        return await this.wordRepository.save(updates);
     }
 
 

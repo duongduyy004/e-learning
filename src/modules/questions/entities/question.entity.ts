@@ -7,14 +7,13 @@ export class QuestionEntity {
     @PrimaryGeneratedColumn('increment')
     id: number;
 
-    @OneToOne(() => WordEntity)
+    @OneToOne(() => WordEntity, word => word.question, { cascade: ['insert'], onDelete: 'CASCADE' })
     @JoinColumn()
     word: WordEntity
 
-    @Generated('increment')
     @Column()
     order: number
 
-    @OneToMany(() => QuestionChoiceEntity, choices => choices.question)
+    @OneToMany(() => QuestionChoiceEntity, choices => choices.question, { cascade: true, })
     choices: QuestionChoiceEntity[]
 }

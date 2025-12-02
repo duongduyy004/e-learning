@@ -2,6 +2,7 @@ import { AllConfigType } from "@/config/config.type";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from "@nestjs/typeorm";
+import { WordSubscriber } from "modules/words/word.subscriber";
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -15,6 +16,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
             password: this.configService.get('database.password', { infer: true }),
             database: this.configService.get('database.dbName', { infer: true }),
             entities: [__dirname + '/../**/*.entity{.js,.ts}'],
+            subscriber: [WordSubscriber],
             synchronize: true,
             ssl: false,
             extra: {
