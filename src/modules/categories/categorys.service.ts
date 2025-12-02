@@ -32,7 +32,8 @@ export class CategoryService {
 
     async getCategory(id: Category['id']) {
         const category = await this.categoryRepository.findOne({
-            where: { id }
+            where: { id },
+            relations: { words: true }
         })
         return CategoryMapper.toDomain(category);
     }
@@ -60,6 +61,7 @@ export class CategoryService {
                 (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
                 {},
             ),
+            relations: { words: true }
         });
 
         const totalItems = total;
