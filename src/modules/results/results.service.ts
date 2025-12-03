@@ -18,7 +18,7 @@ export class ResultsService {
     private resultDetailRepository: Repository<ResultDetailEntity>,
     @InjectRepository(QuestionEntity)
     private questionRepository: Repository<QuestionEntity>,
-  ) {}
+  ) { }
 
   async createResult(user: User, createResultDto: CreateResultDto) {
     const { categoryId } = createResultDto;
@@ -109,35 +109,6 @@ export class ResultsService {
     }
 
     return result;
-  }
-
-  async resumeLearning(user: User, resumeLearningDto: ResumeLearningDto) {
-    const { categoryId, resultId } = resumeLearningDto;
-    const existingResult = await this.resultRepository.findOne({
-      where: {
-        user: { id: user.id },
-        isComplete: false,
-        id: resultId,
-        resultDetails: {
-          user_answer: null,
-          question: {
-            word: {
-              category: { id: categoryId },
-            },
-          },
-        },
-      },
-      relations: {
-        resultDetails: {
-          question: true,
-        },
-      },
-    });
-    console.log(existingResult);
-    if (!existingResult) {
-      throw new BadRequestException('No unfinished lesson found to resume');
-    }
-    return existingResult;
   }
 
   async confirmResult(user: User, resultId: number) {

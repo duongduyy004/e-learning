@@ -17,7 +17,7 @@ import { ResumeLearningDto } from './dto/resume-learning.dto';
 
 @Controller('results')
 export class ResultsController {
-  constructor(private readonly resultsService: ResultsService) {}
+  constructor(private readonly resultsService: ResultsService) { }
 
   @Post()
   createResult(
@@ -59,12 +59,5 @@ export class ResultsController {
   @Patch(':resultId')
   confirmResult(@UserInfo() user: User, @Param('resultId') resultId: number) {
     return this.resultsService.confirmResult(user, resultId);
-  }
-  @Get('/resume')
-  resumeLearning(
-    @UserInfo() user: User,
-    @Body() resumeLearningDto: ResumeLearningDto,
-  ) {
-    return this.resultsService.resumeLearning(user, resumeLearningDto);
   }
 }
