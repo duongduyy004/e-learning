@@ -1,10 +1,10 @@
-import { IsInt, IsNotEmpty, IsString } from "class-validator";
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class UpdateChoiceDto {
-    @IsNotEmpty()
-    @IsInt()
-    id: number;
+  @IsNotEmpty()
+  @IsInt()
+  id: number;
 
-    @IsString()
-    content: string
+  @IsString()
+  content: string;
 }

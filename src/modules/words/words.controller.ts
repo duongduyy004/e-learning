@@ -8,28 +8,25 @@ import { Word } from './word.domain';
 
 @Controller('words')
 export class WordsController {
-  constructor(private readonly wordsService: WordsService) { }
+  constructor(private readonly wordsService: WordsService) {}
 
   @Get()
   getAll(
     @Query() queryDto: QueryDto<FilterWordDto, SortWordDto>,
-    @UserInfo() user: User
+    @UserInfo() user: User,
   ) {
     return this.wordsService.getWords(user.id, {
       filterOptions: queryDto.filters,
       sortOptions: queryDto.sort,
       paginationOptions: {
         limit: queryDto.limit,
-        page: queryDto.page
-      }
-    })
+        page: queryDto.page,
+      },
+    });
   }
 
   @Patch('mark/:wordId')
-  markWord(
-    @UserInfo() user: User,
-    @Param('wordId') wordId: Word['id']
-  ) {
-    return this.wordsService.markWordLearned(wordId, user.id)
+  markWord(@UserInfo() user: User, @Param('wordId') wordId: Word['id']) {
+    return this.wordsService.markWordLearned(wordId, user.id);
   }
 }
