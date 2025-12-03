@@ -11,7 +11,12 @@ export class CategoryMapper {
             domainEntity.words = raw.words.map(item => ({
                 id: item.id,
                 content: item.content,
-                meaning: item.meaning
+                meaning: item.meaning,
+                restChoices: item.question.choices.filter(item => (!item.isCorrect && {
+                    id: item.id,
+                    content: item.content,
+                    isCorrect: item.isCorrect
+                }))
             }))
         }
         return domainEntity;

@@ -8,4 +8,10 @@ export class Word {
   meaning: string;
 
   category: Partial<Category>;
+
+  restChoices?: {
+    id: number,
+    content: string,
+    isCorrect: boolean
+  }[]
 }

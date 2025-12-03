@@ -38,16 +38,6 @@ export class ResultsService {
       isComplete: false,
     });
 
-    // 3. Create ResultDetails for all questions
-    const resultDetails = questions.map((q) => ({
-      result: { id: result.id },
-      question: { id: q.id },
-      user_answer: null,
-      correct_answer: null,
-    }));
-
-    await this.resultDetailRepository.save(resultDetails);
-
     return result;
   }
   async getResults(

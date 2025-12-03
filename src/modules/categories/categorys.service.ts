@@ -22,7 +22,7 @@ export class CategoryService {
     private categoryRepository: Repository<CategoryEntity>,
     private wordService: WordsService,
     private dataSource: DataSource,
-  ) {}
+  ) { }
 
   async createCategory(createCategoryDto: CreateCategoryDto) {
     const category = await this.categoryRepository.save(
@@ -65,7 +65,7 @@ export class CategoryService {
         (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
         {},
       ),
-      relations: { words: true },
+      relations: { words: { question: { choices: true } } },
     });
 
     const totalItems = total;
