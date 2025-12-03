@@ -1,11 +1,11 @@
-import { Category } from "modules/categories/category.domain";
+import { Category } from 'modules/categories/category.domain';
 
 export class Word {
-    id: number;
+  id: number;
 
-    content: string;
+  content: string;
 
-    meaning: string;
+  meaning: string;
 
-    category: Partial<Category>
+  category: Partial<Category>;
 }

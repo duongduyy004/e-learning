@@ -1,14 +1,14 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class CheckAnswerDto {
+export class ResumeLearningDto {
   @Transform((value) => parseInt(value.value))
   @IsNumber()
   @IsNotEmpty()
-  questionId: number;
+  categoryId: number;
 
   @Transform((value) => parseInt(value.value))
   @IsNumber()
   @IsNotEmpty()
-  answerId: number;
+  resultId: number;
 }

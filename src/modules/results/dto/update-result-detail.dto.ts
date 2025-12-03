@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class CheckAnswerDto {
+export class UpdateResultDetailDto {
   @Transform((value) => parseInt(value.value))
   @IsNumber()
   @IsNotEmpty()

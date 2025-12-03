@@ -1,12 +1,26 @@
-import { Exclude } from "class-transformer";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn, ManyToMany, JoinTable, OneToMany } from "typeorm";
-import * as bcrypt from "bcrypt";
-import { RoleEntity } from "@/modules/roles/entities/role.entity";
-import { AuthProvidersEnum } from "modules/auth/auth-providers.enum";
-import { WordEntity } from "modules/words/entities/word.entity";
-import { RelationshipEntity } from "./relationship.entity";
-import { CategoryEntity } from "modules/categories/entities/category.entity";
-import { WordUserEntity } from "modules/words/entities/word-user.entity";
+import { Exclude } from 'class-transformer';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  BeforeInsert,
+  BeforeUpdate,
+  ManyToOne,
+  JoinColumn,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
+} from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { RoleEntity } from '@/modules/roles/entities/role.entity';
+import { AuthProvidersEnum } from 'modules/auth/auth-providers.enum';
+import { WordEntity } from 'modules/words/entities/word.entity';
+import { RelationshipEntity } from './relationship.entity';
+import { CategoryEntity } from 'modules/categories/entities/category.entity';
+import { WordUserEntity } from 'modules/words/entities/word-user.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -44,8 +58,8 @@ export class UserEntity {
   @Column({ default: false })
   isEmailVerified: boolean;
 
-  @OneToMany(() => WordUserEntity, wordUser => wordUser.user)
-  wordUser: WordUserEntity[]
+  @OneToMany(() => WordUserEntity, (wordUser) => wordUser.user)
+  wordUser: WordUserEntity[];
 
   @OneToMany(() => RelationshipEntity, (follow) => follow.following)
   followings: RelationshipEntity[];
@@ -53,11 +67,11 @@ export class UserEntity {
   @OneToMany(() => RelationshipEntity, (follow) => follow.follower)
   followers: RelationshipEntity[];
 
-  @ManyToMany(() => CategoryEntity, category => category.users)
+  @ManyToMany(() => CategoryEntity, (category) => category.users)
   @JoinTable()
-  categories: CategoryEntity[]
+  categories: CategoryEntity[];
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })

@@ -7,21 +7,19 @@ import { CheckAnswerDto } from './dto/check-answer.dto';
 
 @Controller('questions')
 export class QuestionsController {
-  constructor(private readonly questionsService: QuestionsService) { }
+  constructor(private readonly questionsService: QuestionsService) {}
 
   @Get('check')
-  checkAnswer(
-    @Query() checkAnswerDto: CheckAnswerDto
-  ) {
-    return this.questionsService.checkAnswer(checkAnswerDto)
+  checkAnswer(@Query() checkAnswerDto: CheckAnswerDto) {
+    return this.questionsService.checkAnswer(checkAnswerDto);
   }
 
   @Get(':categoryId')
   getQuestions(
     @Param('categoryId') categoryId: string,
-    @Query() queryDto: QueryDto<any, any>
+    @Query() queryDto: QueryDto<any, any>,
   ) {
-    const { limit, page } = queryDto
+    const { limit, page } = queryDto;
     return this.questionsService.getQuestions(+categoryId, { limit, page });
   }
 

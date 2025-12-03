@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
 import { DataSource, FindOptionsWhere, ILike, Repository } from 'typeorm';
@@ -13,128 +17,133 @@ import { UserEntity } from 'modules/users/entities/user.entity';
 
 @Injectable()
 export class CategoryService {
-    constructor(
-        @InjectRepository(CategoryEntity)
-        private categoryRepository: Repository<CategoryEntity>,
-        private wordService: WordsService,
-        private dataSource: DataSource
-    ) { }
+  constructor(
+    @InjectRepository(CategoryEntity)
+    private categoryRepository: Repository<CategoryEntity>,
+    private wordService: WordsService,
+    private dataSource: DataSource,
+  ) {}
 
-    async createCategory(createCategoryDto: CreateCategoryDto) {
-        const category = await this.categoryRepository.save(
-            this.categoryRepository.create({ title: createCategoryDto.title })
-        )
+  async createCategory(createCategoryDto: CreateCategoryDto) {
+    const category = await this.categoryRepository.save(
+      this.categoryRepository.create({ title: createCategoryDto.title }),
+    );
 
-        if (createCategoryDto.words.length > 0)
-            await this.wordService.createWords(createCategoryDto.words, category.id);
-        return CategoryMapper.toDomain(category);
+    if (createCategoryDto.words.length > 0)
+      await this.wordService.createWords(createCategoryDto.words, category.id);
+    return CategoryMapper.toDomain(category);
+  }
+
+  async getCategory(id: Category['id']) {
+    const category = await this.categoryRepository.findOne({
+      where: { id },
+      relations: { words: true },
+    });
+    return CategoryMapper.toDomain(category);
+  }
+
+  async getCategories({
+    filterOptions,
+    sortOptions,
+    paginationOptions,
+  }: {
+    filterOptions?: FilterCategoryDto;
+    sortOptions?: SortCategoryDto[];
+    paginationOptions: IPaginationOptions;
+  }) {
+    const where: FindOptionsWhere<CategoryEntity> = {};
+
+    if (filterOptions?.title) {
+      where.title = ILike(`%${filterOptions.title}%`);
     }
 
-    async getCategory(id: Category['id']) {
-        const category = await this.categoryRepository.findOne({
-            where: { id },
-            relations: { words: true }
-        })
-        return CategoryMapper.toDomain(category);
+    const [entities, total] = await this.categoryRepository.findAndCount({
+      skip: (paginationOptions.page - 1) * paginationOptions.limit,
+      take: paginationOptions.limit,
+      where,
+      order: sortOptions?.reduce(
+        (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
+        {},
+      ),
+      relations: { words: true },
+    });
+
+    const totalItems = total;
+    const totalPages = Math.ceil(totalItems / paginationOptions.limit);
+
+    return {
+      meta: {
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
+        totalPages,
+        totalItems,
+      },
+      result: entities.map(CategoryMapper.toDomain),
+    };
+  }
+
+  async updateCategory(
+    id: Category['id'],
+    updateCategoryDto: UpdateCategoryDto,
+  ) {
+    const category = await this.categoryRepository.findOne({ where: { id } });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
     }
 
-    async getCategories({
-        filterOptions,
-        sortOptions,
-        paginationOptions
-    }: {
-        filterOptions?: FilterCategoryDto,
-        sortOptions?: SortCategoryDto[],
-        paginationOptions: IPaginationOptions
-    }) {
-        const where: FindOptionsWhere<CategoryEntity> = {};
-
-        if (filterOptions?.title) {
-            where.title = ILike(`%${filterOptions.title}%`);
-        }
-
-        const [entities, total] = await this.categoryRepository.findAndCount({
-            skip: (paginationOptions.page - 1) * paginationOptions.limit,
-            take: paginationOptions.limit,
-            where,
-            order: sortOptions?.reduce(
-                (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
-                {},
-            ),
-            relations: { words: true }
-        });
-
-        const totalItems = total;
-        const totalPages = Math.ceil(totalItems / paginationOptions.limit);
-
-        return {
-            meta: {
-                page: paginationOptions.page,
-                limit: paginationOptions.limit,
-                totalPages,
-                totalItems,
-            },
-            result: entities.map(CategoryMapper.toDomain),
-        };
+    // Update category title
+    if (updateCategoryDto.title) {
+      category.title = updateCategoryDto.title;
     }
 
-    async updateCategory(id: Category['id'], updateCategoryDto: UpdateCategoryDto) {
-        const category = await this.categoryRepository.findOne({ where: { id } });
-
-        if (!category) {
-            throw new NotFoundException('Category not found');
-        }
-
-        // Update category title
-        if (updateCategoryDto.title) {
-            category.title = updateCategoryDto.title;
-        }
-
-        // Add new words
-        if (updateCategoryDto.words?.length > 0) {
-            await this.wordService.createWords(updateCategoryDto.words, id);
-        }
-
-        // Update existing words
-        if (updateCategoryDto.updateWords?.length > 0) {
-            await this.wordService.updateWords(updateCategoryDto.updateWords);
-        }
-
-        // Remove specific words
-        if (updateCategoryDto.removeWordIds?.length > 0) {
-            await this.wordService.removeWords(updateCategoryDto.removeWordIds);
-        }
-
-        await this.categoryRepository.save(category);
-
-        return CategoryMapper.toDomain(category);
+    // Add new words
+    if (updateCategoryDto.words?.length > 0) {
+      await this.wordService.createWords(updateCategoryDto.words, id);
     }
 
-    async deleteCategory(id: Category['id']) {
-        return this.categoryRepository.delete({ id })
+    // Update existing words
+    if (updateCategoryDto.updateWords?.length > 0) {
+      await this.wordService.updateWords(updateCategoryDto.updateWords);
     }
 
-    async addCategoryToUser(userId: number, categoryId: number) {
-        return await this.dataSource.transaction(async (manager) => {
-            const user = await manager.findOne(UserEntity, {
-                where: { id: userId },
-                relations: ['categories']
-            });
-
-            const category = await manager.findOneBy(CategoryEntity, { id: categoryId });
-
-            if (!user || !category) {
-                throw new NotFoundException('User or category not found');
-            }
-
-            if (user.categories.some(c => c.id === categoryId)) {
-                throw new BadRequestException('Category already added to user');
-            }
-
-            // Add category to user
-            user.categories.push(category);
-
-            return await manager.save(UserEntity, user);
-        });
+    // Remove specific words
+    if (updateCategoryDto.removeWordIds?.length > 0) {
+      await this.wordService.removeWords(updateCategoryDto.removeWordIds);
     }
+
+    await this.categoryRepository.save(category);
+
+    return CategoryMapper.toDomain(category);
+  }
+
+  async deleteCategory(id: Category['id']) {
+    return this.categoryRepository.delete({ id });
+  }
+
+  async addCategoryToUser(userId: number, categoryId: number) {
+    return await this.dataSource.transaction(async (manager) => {
+      const user = await manager.findOne(UserEntity, {
+        where: { id: userId },
+        relations: ['categories'],
+      });
+
+      const category = await manager.findOneBy(CategoryEntity, {
+        id: categoryId,
+      });
+
+      if (!user || !category) {
+        throw new NotFoundException('User or category not found');
+      }
+
+      if (user.categories.some((c) => c.id === categoryId)) {
+        throw new BadRequestException('Category already added to user');
+      }
+
+      // Add category to user
+      user.categories.push(category);
+
+      return await manager.save(UserEntity, user);
+    });
+  }
 }
