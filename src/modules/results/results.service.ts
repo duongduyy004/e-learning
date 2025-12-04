@@ -38,7 +38,7 @@ export class ResultsService {
           .select('wordUser.wordId')
           .from(WordUserEntity, 'wordUser')
           .where('wordUser.userId = :userId', { userId: user.id })
-          .andWhere('wordUser.isLeanred = true')
+          .andWhere('wordUser.isLearned = true')
           .getQuery();
         return `word.id NOT IN ${subQuery}`;
       })

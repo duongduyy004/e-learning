@@ -91,7 +91,8 @@ export class WordsService {
         'wordUser',
         'wordUser.wordId = word.id AND wordUser.userId = :userId',
         { userId },
-      );
+      )
+      .addSelect('wordUser.isLearned', 'isLearned')
 
     if (filterOptions?.categoryIds && filterOptions.categoryIds.length > 0) {
       queryBuilder.andWhere('category.id IN (:...categoryIds)', {
@@ -111,13 +112,13 @@ export class WordsService {
 
     if (filterOptions?.isLearned === true) {
       // Only words that are learned (exist in word_user with isLearned = true)
-      queryBuilder.andWhere('wordUser.isLeanred = :isLearned', {
+      queryBuilder.andWhere('wordUser.isLearned = :isLearned', {
         isLearned: true,
       });
     } else if (filterOptions?.isLearned === false) {
       // Only words that are NOT learned (don't exist in word_user or isLearned = false)
       queryBuilder.andWhere(
-        '(wordUser.wordId IS NULL OR wordUser.isLeanred = :isLearned)',
+        '(wordUser.wordId IS NULL OR wordUser.isLearned = :isLearned)',
         { isLearned: false },
       );
     }
@@ -142,6 +143,12 @@ export class WordsService {
     const totalItems = total;
     const totalPages = Math.ceil(totalItems / paginationOptions.limit);
 
+
+    const result = entities.map(word => ({
+      ...word,
+      isLearned: (word as any).isLearned ?? false,
+    }));
+
     return {
       meta: {
         page: paginationOptions.page,
@@ -149,11 +156,28 @@ export class WordsService {
         totalPages,
         totalItems,
       },
-      result: entities,
+      result
     };
   }
 
   async markWordLearned(wordId: Word['id'], userId: User['id']) {
-    return this.wordUserRepository.update({ wordId, userId }, { isLeanred: true });
+    const progress = await this.wordUserRepository.findOne({
+      where: {
+        wordId,
+        userId,
+      },
+    });
+
+    if (!progress) {
+      await this.wordUserRepository.save({
+        userId,
+        wordId,
+        isLeanred: true,
+      });
+    } else if (!progress.isLearned) {
+      progress.isLearned = true;
+      await this.wordUserRepository.save(progress);
+    }
+    return progress;
   }
 }

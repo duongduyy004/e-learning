@@ -11,7 +11,7 @@ export class WordUserEntity {
   wordId: number;
 
   @Column()
-  isLeanred: boolean;
+  isLearned: boolean;
 
   @ManyToOne(() => UserEntity, (user) => user.wordUser, {
     onDelete: 'CASCADE',
