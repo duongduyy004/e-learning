@@ -5,6 +5,8 @@ import { Category } from './category.domain';
 import { QueryDto } from 'utils/types/query.dto';
 import { FilterCategoryDto, SortCategoryDto } from './dto/quey-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { UserInfo } from 'decorator/customize.decorator';
+import { User } from 'modules/users/user.domain';
 
 @Controller('category')
 export class CategoryController {
@@ -13,6 +15,12 @@ export class CategoryController {
   @Post()
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.createCategory(createCategoryDto);
+  }
+
+
+  @Get('me')
+  getUserCategories(@UserInfo() user: User) {
+    return this.categoryService.getUserCategories(user);
   }
 
   @Get(':categoryId')

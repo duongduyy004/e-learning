@@ -10,6 +10,9 @@ export class CategoryEntity {
     @Column()
     title: string;
 
+    @Column({ default: false })
+    isPublic: boolean
+
     @OneToMany(() => WordEntity, words => words.category, { onDelete: 'CASCADE' })
     words: WordEntity[]
 
