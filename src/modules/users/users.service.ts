@@ -65,12 +65,13 @@ export class UsersService {
     return;
   }
 
-  async findUserByToken(refreshToken: string): Promise<User | null> {
+  async findUserByToken(refreshToken: string) {
     const user = await this.userRepository.findOne({
       where: { refreshToken },
+      relations: { categories: true }
     });
     if (!user) return null;
-    return UserMapper.toDomain(user);
+    return user;
   }
 
   async uploadAvatar(
