@@ -37,7 +37,7 @@ export class CategoryService {
   async getCategory(id: Category['id']) {
     const category = await this.categoryRepository.findOne({
       where: { id },
-      relations: { words: true },
+      relations: { words: { question: { choices: true } } },
     });
     return CategoryMapper.toDomain(category);
   }
