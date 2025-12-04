@@ -1,9 +1,9 @@
 import { IsNotEmpty } from "class-validator";
 
-export class SubmitResultDto {
+export class SubmitAnswerDto {
     @IsNotEmpty()
     userAnswerId: number;
 
     @IsNotEmpty()
-    correctAnswerId: number;
+    questionId: number;
 }

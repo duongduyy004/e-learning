@@ -1,5 +1,6 @@
 import { UserEntity } from 'modules/users/entities/user.entity';
 import {
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -39,6 +40,12 @@ export class ResultEntity {
   @CreateDateColumn()
   startedAt: Date;
 
-  @Column()
+  @Column({ nullable: true })
   completedAt: Date;
+
+  @BeforeUpdate()
+  updateResultStatus() {
+    if (this.currentIndex === this.questionIds.length - 1)
+      this.isComplete = true;
+  }
 }

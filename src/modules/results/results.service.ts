@@ -5,9 +5,11 @@ import { Repository } from 'typeorm';
 import { ResultDetailEntity } from './entities/result-detail.entity';
 import { User } from 'modules/users/user.domain';
 import { CreateResultDto } from './dto/create-result.dto';
-import { UpdateResultDetailDto } from './dto/update-result-detail.dto';
-import { SubmitResultDto } from './dto/submit-result.dto';
+import { SubmitAnswerDto } from './dto/submit-answer.dto';
 import { Result } from './result.domain';
+import { QuestionEntity } from 'modules/questions/entities/question.entity';
+import { WordUserEntity } from 'modules/words/entities/word-user.entity';
+import { QuestionChoiceEntity } from 'modules/questions/entities/question-choice.entity';
 
 @Injectable()
 export class ResultsService {
@@ -16,35 +18,82 @@ export class ResultsService {
     private resultRepository: Repository<ResultEntity>,
     @InjectRepository(ResultDetailEntity)
     private resultDetailRepository: Repository<ResultDetailEntity>,
+    @InjectRepository(QuestionEntity)
+    private questionRepository: Repository<QuestionEntity>,
+    @InjectRepository(QuestionChoiceEntity)
+    private questionChoiceRepository: Repository<QuestionChoiceEntity>
   ) { }
 
   async createResult(user: User, createResultDto: CreateResultDto) {
     const { categoryId } = createResultDto;
 
-    const result = await this.resultRepository.save({
-      user: { id: user.id },
-      category: { id: categoryId },
-      isComplete: false,
-    });
+    const questions = await this.questionRepository
+      .createQueryBuilder('question')
+      .leftJoinAndSelect('question.word', 'word')
+      .where('word.categoryId = :categoryId', { categoryId })
+      .andWhere(qb => {
+        const subQuery = qb.subQuery()
+          .select('wordUser.wordId')
+          .from(WordUserEntity, 'wordUser')
+          .where('wordUser.userId = :userId', { userId: user.id })
+          .andWhere('wordUser.isLeanred = true')
+          .getQuery();
+        return `word.id NOT IN ${subQuery}`;
+      })
+      .getMany();
+
+    const shuffle = (array: number[]) => {
+      let currentIndex = array.length;
+
+      // While there remain elements to shuffle...
+      while (currentIndex != 0) {
+
+        // Pick a remaining element...
+        let randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+          array[randomIndex], array[currentIndex]];
+
+        return array;
+      }
+    }
+
+    const result = await this.resultRepository.save(
+      this.resultRepository.create({
+        user: { id: user.id },
+        category: { id: categoryId },
+        questionIds: shuffle(questions.map(item => item.id)),
+      })
+    )
 
     return result;
   }
 
-  async submitResult(resultId: Result['id'], submitResultDto: SubmitResultDto[]) {
+  async submitAnswer(resultId: Result['id'], submitResultDto: SubmitAnswerDto) {
     const resultEntity = await this.resultRepository.findOne({
       where: { id: resultId },
       relations: { resultDetails: true }
     })
 
-    for (const result of submitResultDto) {
-      resultEntity.resultDetails.push(
-        this.resultDetailRepository.create({
-          userAnswer: result.userAnswerId,
-          correctAnswer: result.correctAnswerId,
-          isCorrect: result.userAnswerId === result.correctAnswerId
-        })
-      )
-    }
+    if (!resultEntity) throw new BadRequestException('Result not found')
+
+    const correctAnswer = await this.questionChoiceRepository.findOne({
+      where: { question: { id: submitResultDto.questionId }, isCorrect: true },
+    })
+
+    if (!correctAnswer) throw new BadRequestException('Correct answer not found')
+
+    resultEntity.currentIndex = resultEntity.currentIndex + 1;
+
+    resultEntity.resultDetails.push(
+      this.resultDetailRepository.create({
+        userAnswer: submitResultDto.userAnswerId,
+        correctAnswer: correctAnswer.id,
+        isCorrect: submitResultDto.userAnswerId === correctAnswer.id
+      })
+    )
 
     return await this.resultRepository.save(resultEntity);
   }
@@ -54,20 +103,12 @@ export class ResultsService {
     pagination: { limit: number; page: number },
     categoryId?: number,
   ) {
-    const where: any = { user: { id: userId } };
-
-    if (categoryId) {
-      where.resultDetails = {
-        question: {
-          word: {
-            category: { id: categoryId },
-          },
-        },
-      };
-    }
 
     const [results, total] = await this.resultRepository.findAndCount({
-      where,
+      where: {
+        category: { id: categoryId },
+        user: { id: userId }
+      },
       relations: {
         resultDetails: {
           question: { word: { category: true } },
@@ -86,13 +127,13 @@ export class ResultsService {
         totalPages,
         totalItems,
       },
-      result: results.length > 0 ? results : 'No result found!',
+      result: results.length > 0 ? results : null,
     };
   }
 
-  async getResultById(user: User, resultId: number) {
+  async getResultById(resultId: number) {
     const result = await this.resultRepository.findOne({
-      where: { id: resultId, user: { id: user.id } },
+      where: { id: resultId },
       relations: {
         resultDetails: {
           question: {
@@ -108,56 +149,5 @@ export class ResultsService {
     }
 
     return result;
-  }
-
-  async confirmResult(user: User, resultId: number) {
-    const result = await this.resultRepository.findOne({
-      where: { id: resultId, user: { id: user.id } },
-    });
-
-    if (!result) {
-      throw new BadRequestException('Result not found!');
-    }
-
-    result.isComplete = true;
-
-    return await this.resultRepository.save(result);
-  }
-
-  async updateResultDetail(
-    user: User,
-    updateResultDetailDto: UpdateResultDetailDto,
-  ) {
-    const { questionId, answerId } = updateResultDetailDto;
-
-    const resultDetail = await this.resultDetailRepository.findOne({
-      where: {
-        question: { id: questionId },
-        result: {
-          user: { id: user.id },
-          isComplete: false,
-        },
-      },
-      relations: {
-        question: { choices: true },
-      },
-    });
-
-    if (!resultDetail) {
-      throw new BadRequestException(
-        'Result detail not found or result is already completed',
-      );
-    }
-
-    // Check if answer is correct
-    const correctChoice = resultDetail.question.choices.find(
-      (c) => c.isCorrect,
-    );
-    const isCorrect = correctChoice && correctChoice.id === answerId;
-
-    resultDetail.userAnswer = answerId;
-    resultDetail.correctAnswer = correctChoice ? correctChoice.id : null;
-
-    return await this.resultDetailRepository.save(resultDetail);
   }
 }

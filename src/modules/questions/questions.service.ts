@@ -6,7 +6,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UpdateChoiceDto } from './dto/update-choice.dto';
 import { Category } from 'modules/categories/category.domain';
-import { CheckAnswerDto } from './dto/check-answer.dto';
 
 @Injectable()
 export class QuestionsService {
@@ -59,45 +58,13 @@ export class QuestionsService {
     return await this.questionRepository.save(questions);
   }
 
-  async getQuestions(
-    categoryId: Category['id'],
-    pagination: { limit: number; page: number },
-  ) {
-    const [questions, total] = await this.questionRepository.findAndCount({
-      where: { word: { category: { id: categoryId } } },
-      relations: { word: true, choices: true },
-      take: pagination.limit,
-      skip: (pagination.page - 1) * pagination.limit,
-    });
-    const totalItems = total;
-    const totalPages = Math.ceil(totalItems / pagination.limit);
-
-    return {
-      meta: {
-        page: pagination.page,
-        limit: pagination.limit,
-        totalPages,
-        totalItems,
-      },
-      result: questions,
-    };
-  }
-
-  async checkAnswer(checkAnswerDto: CheckAnswerDto) {
-    const { answerId, questionId } = checkAnswerDto;
-
-    const question = await this.questionRepository.findOne({
+  async getQuestion(questionId: number) {
+    const question = this.questionRepository.findOne({
       where: { id: questionId },
-      relations: { choices: true },
-    });
-
-    if (!question) throw new BadRequestException('Question not found');
-
-    const correctAnswer = question.choices.find((item) => item.isCorrect);
-
-    return {
-      isCorrect: answerId === correctAnswer.id,
-      correctId: correctAnswer.id,
-    };
+      relations: { word: true, choices: true }
+    })
+    if (!question)
+      throw new BadRequestException('Question not foud');
+    return question;
   }
 }
