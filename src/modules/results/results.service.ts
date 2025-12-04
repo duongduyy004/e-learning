@@ -113,6 +113,7 @@ export class ResultsService {
         resultDetails: {
           question: { word: { category: true } },
         },
+        category: true
       },
       take: pagination.limit,
       skip: (pagination.page - 1) * pagination.limit,
@@ -141,6 +142,7 @@ export class ResultsService {
             choices: true,
           },
         },
+        category: true
       },
     });
 
