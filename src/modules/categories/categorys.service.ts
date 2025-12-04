@@ -14,6 +14,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { WordsService } from 'modules/words/words.service';
 import { UserEntity } from 'modules/users/entities/user.entity';
+import { User } from 'modules/users/user.domain';
 
 @Injectable()
 export class CategoryService {
@@ -26,7 +27,7 @@ export class CategoryService {
 
   async createCategory(createCategoryDto: CreateCategoryDto) {
     const category = await this.categoryRepository.save(
-      this.categoryRepository.create({ title: createCategoryDto.title }),
+      this.categoryRepository.create({ title: createCategoryDto.title, isPublic: createCategoryDto.isPublic ?? false }),
     );
 
     if (createCategoryDto.words.length > 0)
@@ -97,6 +98,10 @@ export class CategoryService {
       category.title = updateCategoryDto.title;
     }
 
+    if (updateCategoryDto.isPublic) {
+      category.isPublic = updateCategoryDto.isPublic;
+    }
+
     // Add new words
     if (updateCategoryDto.words?.length > 0) {
       await this.wordService.createWords(updateCategoryDto.words, id);
@@ -145,5 +150,15 @@ export class CategoryService {
 
       return await manager.save(UserEntity, user);
     });
+  }
+
+  async getUserCategories(user: User) {
+    const userCates = await this.categoryRepository.createQueryBuilder('cate')
+      .leftJoin('cate.users', 'cateUser')
+      .where('cate.isPublic = true')
+      .orWhere('cateUser.id = :userId', { userId: user.id })
+      .getMany()
+
+    return userCates;
   }
 }
