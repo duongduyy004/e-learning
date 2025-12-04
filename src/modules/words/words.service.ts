@@ -154,23 +154,6 @@ export class WordsService {
   }
 
   async markWordLearned(wordId: Word['id'], userId: User['id']) {
-    const progress = await this.wordUserRepository.findOne({
-      where: {
-        wordId,
-        userId,
-      },
-    });
-
-    if (!progress) {
-      await this.wordUserRepository.save({
-        userId,
-        wordId,
-        isLeanred: true,
-      });
-    } else if (!progress.isLeanred) {
-      progress.isLeanred = true;
-      await this.wordUserRepository.save(progress);
-    }
-    return progress;
+    return this.wordUserRepository.update({ wordId, userId }, { isLeanred: true });
   }
 }

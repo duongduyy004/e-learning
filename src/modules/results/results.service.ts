@@ -10,6 +10,7 @@ import { Result } from './result.domain';
 import { QuestionEntity } from 'modules/questions/entities/question.entity';
 import { WordUserEntity } from 'modules/words/entities/word-user.entity';
 import { QuestionChoiceEntity } from 'modules/questions/entities/question-choice.entity';
+import { WordsService } from 'modules/words/words.service';
 
 @Injectable()
 export class ResultsService {
@@ -21,7 +22,8 @@ export class ResultsService {
     @InjectRepository(QuestionEntity)
     private questionRepository: Repository<QuestionEntity>,
     @InjectRepository(QuestionChoiceEntity)
-    private questionChoiceRepository: Repository<QuestionChoiceEntity>
+    private questionChoiceRepository: Repository<QuestionChoiceEntity>,
+    private wordsService: WordsService
   ) { }
 
   async createResult(user: User, createResultDto: CreateResultDto) {
@@ -81,6 +83,7 @@ export class ResultsService {
 
     const correctAnswer = await this.questionChoiceRepository.findOne({
       where: { question: { id: submitResultDto.questionId }, isCorrect: true },
+      relations: { question: { word: true } }
     })
 
     if (!correctAnswer) throw new BadRequestException('Correct answer not found')
@@ -94,6 +97,9 @@ export class ResultsService {
         isCorrect: submitResultDto.userAnswerId === correctAnswer.id
       })
     )
+
+    if (submitResultDto.userAnswerId === correctAnswer.id)
+      await this.wordsService.markWordLearned(correctAnswer.question.word.id, resultEntity.user.id)
 
     return await this.resultRepository.save(resultEntity);
   }
