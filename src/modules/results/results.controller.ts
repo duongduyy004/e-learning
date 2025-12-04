@@ -12,8 +12,6 @@ import { ResultsService } from './results.service';
 import { UserInfo } from 'decorator/customize.decorator';
 import { User } from 'modules/users/user.domain';
 import { UpdateResultDetailDto } from './dto/update-result-detail.dto';
-import { QueryDto } from 'utils/types/query.dto';
-import { ResumeLearningDto } from './dto/resume-learning.dto';
 
 @Controller('results')
 export class ResultsController {

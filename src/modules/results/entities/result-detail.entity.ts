@@ -13,11 +13,14 @@ export class ResultDetailEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @Column({ nullable: true })
-  user_answer: number;
+  @Column()
+  userAnswer: number;
 
-  @Column({ nullable: true })
-  correct_answer: number;
+  @Column()
+  correctAnswer: number;
+
+  @Column()
+  isCorrect: boolean;
 
   @ManyToOne(() => ResultEntity, (result) => result.resultDetails)
   @JoinColumn({ name: 'resultId' })

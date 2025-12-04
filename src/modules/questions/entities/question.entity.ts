@@ -22,9 +22,6 @@ export class QuestionEntity {
   @JoinColumn()
   word: WordEntity;
 
-  @Column()
-  order: number;
-
   @OneToMany(() => QuestionChoiceEntity, (choices) => choices.question, {
     cascade: true,
   })

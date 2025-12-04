@@ -20,15 +20,12 @@ export class WordsService {
     private wordUserRepository: Repository<WordUserEntity>,
     private dataSource: DataSource,
     private questionsService: QuestionsService,
-  ) {}
+  ) { }
 
   async createWords(
     createWordDto: CreateWordDto[],
     categoryId: Category['id'],
   ) {
-    let lastQuestionOrder = await this.questionsService.getLastQuestionOrder(
-      categoryId,
-    );
     const word = await this.wordRepository.save(
       this.wordRepository.create(
         createWordDto.map((item) => ({
@@ -36,15 +33,14 @@ export class WordsService {
           meaning: item.meaning,
           category: { id: categoryId },
           question: {
-            order: ++lastQuestionOrder,
             choices: item.restChoices
               ? [
-                  ...item.restChoices.map((item) => ({
-                    content: item.content,
-                    isCorrect: false,
-                  })),
-                  { content: item.meaning, isCorrect: true },
-                ]
+                ...item.restChoices.map((item) => ({
+                  content: item.content,
+                  isCorrect: false,
+                })),
+                { content: item.meaning, isCorrect: true },
+              ]
               : [{ content: item.meaning, isCorrect: true }],
           },
         })),

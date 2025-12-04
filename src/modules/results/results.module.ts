@@ -4,17 +4,15 @@ import { ResultsController } from './results.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ResultEntity } from './entities/result.entity';
 import { ResultDetailEntity } from './entities/result-detail.entity';
-import { QuestionEntity } from 'modules/questions/entities/question.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       ResultEntity,
-      ResultDetailEntity,
-      QuestionEntity,
+      ResultDetailEntity
     ]),
   ],
   controllers: [ResultsController],
   providers: [ResultsService],
 })
-export class ResultsModule {}
+export class ResultsModule { }

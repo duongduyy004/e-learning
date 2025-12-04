@@ -1,6 +1,7 @@
 import { UserEntity } from 'modules/users/entities/user.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -8,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ResultDetailEntity } from './result-detail.entity';
+import { CategoryEntity } from 'modules/categories/entities/category.entity';
 
 @Entity('result')
 export class ResultEntity {
@@ -18,9 +20,25 @@ export class ResultEntity {
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
+  @ManyToOne(() => CategoryEntity)
+  @JoinColumn({ name: 'categoryId' })
+  category: CategoryEntity;
+
+  @Column({ type: 'int', array: true, nullable: false })
+  questionIds: number[]
+
+  @Column({ default: 0 })
+  currentIndex: number;
+
   @Column({ default: false })
   isComplete: boolean;
 
-  @OneToMany(() => ResultDetailEntity, (resultDetails) => resultDetails.result)
+  @OneToMany(() => ResultDetailEntity, (resultDetails) => resultDetails.result, { cascade: true })
   resultDetails: ResultDetailEntity[];
+
+  @CreateDateColumn()
+  startedAt: Date;
+
+  @Column()
+  completedAt: Date;
 }

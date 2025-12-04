@@ -3,11 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ResultEntity } from './entities/result.entity';
 import { Repository } from 'typeorm';
 import { ResultDetailEntity } from './entities/result-detail.entity';
-import { QuestionEntity } from 'modules/questions/entities/question.entity';
 import { User } from 'modules/users/user.domain';
 import { CreateResultDto } from './dto/create-result.dto';
 import { UpdateResultDetailDto } from './dto/update-result-detail.dto';
-import { ResumeLearningDto } from './dto/resume-learning.dto';
+import { SubmitResultDto } from './dto/submit-result.dto';
+import { Result } from './result.domain';
 
 @Injectable()
 export class ResultsService {
@@ -16,30 +16,39 @@ export class ResultsService {
     private resultRepository: Repository<ResultEntity>,
     @InjectRepository(ResultDetailEntity)
     private resultDetailRepository: Repository<ResultDetailEntity>,
-    @InjectRepository(QuestionEntity)
-    private questionRepository: Repository<QuestionEntity>,
   ) { }
 
   async createResult(user: User, createResultDto: CreateResultDto) {
     const { categoryId } = createResultDto;
-    // Find all question from category with categoryId
-    const questions = await this.questionRepository.find({
-      where: { word: { category: { id: categoryId } } },
-      order: { order: 'ASC' },
-    });
-    // 1. Validate
-    if (!questions || questions.length === 0) {
-      throw new BadRequestException('No questions found for this category');
-    }
 
-    // 2. Create Result
     const result = await this.resultRepository.save({
       user: { id: user.id },
+      category: { id: categoryId },
       isComplete: false,
     });
 
     return result;
   }
+
+  async submitResult(resultId: Result['id'], submitResultDto: SubmitResultDto[]) {
+    const resultEntity = await this.resultRepository.findOne({
+      where: { id: resultId },
+      relations: { resultDetails: true }
+    })
+
+    for (const result of submitResultDto) {
+      resultEntity.resultDetails.push(
+        this.resultDetailRepository.create({
+          userAnswer: result.userAnswerId,
+          correctAnswer: result.correctAnswerId,
+          isCorrect: result.userAnswerId === result.correctAnswerId
+        })
+      )
+    }
+
+    return await this.resultRepository.save(resultEntity);
+  }
+
   async getResults(
     userId: User['id'],
     pagination: { limit: number; page: number },
@@ -146,8 +155,8 @@ export class ResultsService {
     );
     const isCorrect = correctChoice && correctChoice.id === answerId;
 
-    resultDetail.user_answer = answerId;
-    resultDetail.correct_answer = correctChoice ? correctChoice.id : null;
+    resultDetail.userAnswer = answerId;
+    resultDetail.correctAnswer = correctChoice ? correctChoice.id : null;
 
     return await this.resultDetailRepository.save(resultDetail);
   }

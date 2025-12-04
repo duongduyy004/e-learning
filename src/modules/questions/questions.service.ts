@@ -15,37 +15,18 @@ export class QuestionsService {
     private questionRepository: Repository<QuestionEntity>,
     @InjectRepository(QuestionChoiceEntity)
     private questionChoiceRepository: Repository<QuestionChoiceEntity>,
-  ) {}
-
-  async getLastQuestionOrder(categoryId: number) {
-    const lastQuestion = await this.questionRepository.findOne({
-      where: { word: { category: { id: categoryId } } },
-      order: { order: 'DESC' },
-    });
-    return lastQuestion ? lastQuestion.order : 0;
-  }
+  ) { }
 
   async updateQuestion(updateQUestionDto: UpdateQuestionDto[]) {
     const questions = await this.questionRepository.find({
       where: { id: In(updateQUestionDto.map((item) => item.id)) },
-      relations: { choices: true },
-      order: { order: 'ASC' },
+      relations: { choices: true }
     });
 
-    const newOrders = updateQUestionDto.filter((item) => item.order);
     const choicesUpdate = updateQUestionDto.reduce((acc, item) => {
       acc[item.id] = item.choices;
       return acc;
     }, {} as Record<number, UpdateChoiceDto[]>);
-
-    if (newOrders.length === updateQUestionDto.length) {
-      for (const q of questions) {
-        const updated = updateQUestionDto.find((item) => item.id === q.id);
-        if (updated) {
-          q.order = updated.order;
-        }
-      }
-    }
 
     const deleteChoiceIds: number[] = [];
 
@@ -85,7 +66,6 @@ export class QuestionsService {
     const [questions, total] = await this.questionRepository.findAndCount({
       where: { word: { category: { id: categoryId } } },
       relations: { word: true, choices: true },
-      order: { order: 'ASC' },
       take: pagination.limit,
       skip: (pagination.page - 1) * pagination.limit,
     });

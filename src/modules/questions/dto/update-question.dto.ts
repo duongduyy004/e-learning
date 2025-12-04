@@ -6,9 +6,6 @@ export class UpdateQuestionDto {
   @IsInt()
   id: number;
 
-  @IsInt()
-  order?: number;
-
   @IsArray({ each: true })
   choices?: UpdateChoiceDto[];
 }
