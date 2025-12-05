@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ResultEntity } from './entities/result.entity';
 import { Repository } from 'typeorm';
@@ -29,48 +29,52 @@ export class ResultsService {
   async createResult(user: User, createResultDto: CreateResultDto) {
     const { categoryId } = createResultDto;
 
-    const questions = await this.questionRepository
-      .createQueryBuilder('question')
-      .leftJoinAndSelect('question.word', 'word')
-      .where('word.categoryId = :categoryId', { categoryId })
-      .andWhere(qb => {
-        const subQuery = qb.subQuery()
-          .select('wordUser.wordId')
-          .from(WordUserEntity, 'wordUser')
-          .where('wordUser.userId = :userId', { userId: user.id })
-          .andWhere('wordUser.isLearned = true')
-          .getQuery();
-        return `word.id NOT IN ${subQuery}`;
-      })
-      .getMany();
+    try {
+      const questions = await this.questionRepository
+        .createQueryBuilder('question')
+        .leftJoinAndSelect('question.word', 'word')
+        .where('word.categoryId = :categoryId', { categoryId })
+        .andWhere(qb => {
+          const subQuery = qb.subQuery()
+            .select('wordUser.wordId')
+            .from(WordUserEntity, 'wordUser')
+            .where('wordUser.userId = :userId', { userId: user.id })
+            .andWhere('wordUser.isLearned = true')
+            .getQuery();
+          return `word.id NOT IN ${subQuery}`;
+        })
+        .getMany();
 
-    const shuffle = (array: number[]) => {
-      let currentIndex = array.length;
+      const shuffle = (array: number[]) => {
+        let currentIndex = array.length;
 
-      // While there remain elements to shuffle...
-      while (currentIndex != 0) {
+        // While there remain elements to shuffle...
+        while (currentIndex != 0) {
 
-        // Pick a remaining element...
-        let randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
+          // Pick a remaining element...
+          let randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex--;
 
-        // And swap it with the current element.
-        [array[currentIndex], array[randomIndex]] = [
-          array[randomIndex], array[currentIndex]];
+          // And swap it with the current element.
+          [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
 
-        return array;
+          return array;
+        }
       }
+
+      const result = await this.resultRepository.save(
+        this.resultRepository.create({
+          user: { id: user.id },
+          category: { id: categoryId },
+          questionIds: shuffle(questions.map(item => item.id)),
+        })
+      )
+
+      return result;
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message)
     }
-
-    const result = await this.resultRepository.save(
-      this.resultRepository.create({
-        user: { id: user.id },
-        category: { id: categoryId },
-        questionIds: shuffle(questions.map(item => item.id)),
-      })
-    )
-
-    return result;
   }
 
   async submitAnswer(resultId: Result['id'], submitResultDto: SubmitAnswerDto) {
