@@ -76,7 +76,7 @@ export class ResultsService {
   async submitAnswer(resultId: Result['id'], submitResultDto: SubmitAnswerDto) {
     const resultEntity = await this.resultRepository.findOne({
       where: { id: resultId },
-      relations: { resultDetails: true }
+      relations: { resultDetails: true, user: true }
     })
 
     if (!resultEntity) throw new BadRequestException('Result not found')
@@ -92,8 +92,9 @@ export class ResultsService {
 
     resultEntity.resultDetails.push(
       this.resultDetailRepository.create({
-        userAnswer: submitResultDto.userAnswerId,
-        correctAnswer: correctAnswer.id,
+        userAnswerId: submitResultDto.userAnswerId,
+        correctAnswerId: correctAnswer.id,
+        question: { id: submitResultDto.questionId },
         isCorrect: submitResultDto.userAnswerId === correctAnswer.id
       })
     )
@@ -116,9 +117,6 @@ export class ResultsService {
         user: { id: userId }
       },
       relations: {
-        resultDetails: {
-          question: { word: { category: true } },
-        },
         category: true
       },
       take: pagination.limit,

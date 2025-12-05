@@ -4,20 +4,25 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ResultEntity } from './result.entity';
 
 @Entity('result_details')
 export class ResultDetailEntity {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+
+  @PrimaryColumn()
+  resultId: number;
+
+  @PrimaryColumn()
+  questionId: string;
 
   @Column()
-  userAnswer: number;
+  userAnswerId: number;
 
   @Column()
-  correctAnswer: number;
+  correctAnswerId: number;
 
   @Column()
   isCorrect: boolean;
