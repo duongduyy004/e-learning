@@ -41,6 +41,7 @@ import { CategoryModule } from './modules/categories/category.module';
 import { WordsModule } from 'modules/words/words.module';
 import { QuestionsModule } from 'modules/questions/questions.module';
 import { ResultsModule } from 'modules/results/results.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -107,7 +108,8 @@ import { ResultsModule } from 'modules/results/results.module';
     CategoryModule,
     WordsModule,
     QuestionsModule,
-    ResultsModule
+    ResultsModule,
+    NotificationsModule
   ],
   controllers: [AppController],
   providers: [
