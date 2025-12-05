@@ -172,7 +172,7 @@ export class WordsService {
       await this.wordUserRepository.save({
         userId,
         wordId,
-        isLeanred: true,
+        isLearned: true,
       });
     } else if (!progress.isLearned) {
       progress.isLearned = true;
