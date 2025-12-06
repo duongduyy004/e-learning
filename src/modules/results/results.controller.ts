@@ -22,8 +22,9 @@ export class ResultsController {
   createResult(
     @UserInfo() user: User,
     @Param() createResultDto: CreateResultDto,
+    @Query('isLearned') isLearned: boolean
   ) {
-    return this.resultsService.createResult(user, createResultDto);
+    return this.resultsService.createResult(user, { ...createResultDto, isLearned });
   }
 
   @Get('detail/:id')

@@ -39,7 +39,7 @@ export class ResultsService {
             .select('wordUser.wordId')
             .from(WordUserEntity, 'wordUser')
             .where('wordUser.userId = :userId', { userId: user.id })
-            .andWhere('wordUser.isLearned = true')
+            .andWhere('wordUser.isLearned = :isLearned', { isLearned: createResultDto.isLearned !== undefined ? !createResultDto.isLearned : null })
             .getQuery();
           return `word.id NOT IN ${subQuery}`;
         })
@@ -62,6 +62,7 @@ export class ResultsService {
           return array;
         }
       }
+      return questions;
 
       const result = await this.resultRepository.save(
         this.resultRepository.create({
