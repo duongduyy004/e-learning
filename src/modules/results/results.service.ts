@@ -15,6 +15,9 @@ import { QuestionEntity } from 'modules/questions/entities/question.entity';
 import { WordUserEntity } from 'modules/words/entities/word-user.entity';
 import { QuestionChoiceEntity } from 'modules/questions/entities/question-choice.entity';
 import { WordsService } from 'modules/words/words.service';
+import { NotificationsService } from 'modules/notifications/notifications.service';
+import { ENTITY_TYPE } from 'modules/notifications/entity.type';
+import { UserMapper } from 'modules/users/user.mapper';
 
 @Injectable()
 export class ResultsService {
@@ -28,6 +31,7 @@ export class ResultsService {
     @InjectRepository(QuestionChoiceEntity)
     private questionChoiceRepository: Repository<QuestionChoiceEntity>,
     private wordsService: WordsService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async createResult(user: User, createResultDto: CreateResultDto) {
@@ -73,7 +77,6 @@ export class ResultsService {
           return array;
         }
       };
-
       const result = await this.resultRepository.save(
         this.resultRepository.create({
           user: { id: user.id },
@@ -81,6 +84,12 @@ export class ResultsService {
           questionIds: shuffle(questions.map((item) => item.id)),
         }),
       );
+
+      // Trigger notification for starting a lesson
+      await this.notificationsService.createAndSendNotification(user, {
+        entityTypeId: ENTITY_TYPE.START_LESSON.id,
+        entityId: result.id,
+      });
 
       return result;
     } catch (error) {
@@ -120,8 +129,24 @@ export class ResultsService {
         correctAnswer.question.word.id,
         resultEntity.user.id,
       );
+    const savedResult = await this.resultRepository.save(resultEntity);
 
-    return await this.resultRepository.save(resultEntity);
+    if (savedResult.isComplete) {
+      // Trigger notification for finishing a lesson
+      try {
+        await this.notificationsService.createAndSendNotification(
+          UserMapper.toDomain(resultEntity.user),
+          {
+            entityTypeId: ENTITY_TYPE.FINISH_LESSON.id,
+            entityId: savedResult.id,
+          },
+        );
+      } catch (error) {
+        console.error('Error sending finish lesson notification:', error);
+      }
+    }
+
+    return savedResult;
   }
 
   async getResults(

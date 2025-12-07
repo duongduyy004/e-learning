@@ -5,6 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationEntity } from './entities/notification.entity';
 import { NotificationObjectEntity } from './entities/notification-object.entity';
 import { RelationshipEntity } from 'modules/users/entities/relationship.entity';
+import { NotificationsGateway } from './notifications.gateway';
+import { JwtService } from '@nestjs/jwt';
+import { UserEntity } from 'modules/users/entities/user.entity';
 
 @Global()
 @Module({
@@ -12,11 +15,12 @@ import { RelationshipEntity } from 'modules/users/entities/relationship.entity';
     TypeOrmModule.forFeature([
       NotificationEntity,
       NotificationObjectEntity,
-      RelationshipEntity
+      RelationshipEntity,
+      UserEntity,
     ]),
   ],
   controllers: [NotificationsController],
-  providers: [NotificationsService],
-  exports: [NotificationsService]
+  providers: [NotificationsService, NotificationsGateway, JwtService],
+  exports: [NotificationsService],
 })
-export class NotificationsModule { }
+export class NotificationsModule {}

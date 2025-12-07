@@ -1,5 +1,9 @@
+import { Type } from 'class-transformer';
+
 export class CreateNotificationDto {
-    actorId: number;
-    entityTypeId?: number;
-    entityId?: number;
+  @Type(() => Number)
+  entityTypeId: number;
+
+  @Type(() => Number)
+  entityId: number;
 }

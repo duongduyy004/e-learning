@@ -1,34 +1,34 @@
-import { Exclude } from "class-transformer";
-import { Category } from "modules/categories/category.domain";
-import { Role } from "modules/roles/role.domain";
+import { Exclude } from 'class-transformer';
+import { Category } from 'modules/categories/category.domain';
+import { Role } from 'modules/roles/role.domain';
 
 export class User {
-    id: number;
+  id: number;
 
-    name: string;
+  name: string;
 
-    email: string | null
+  email: string | null;
 
-    @Exclude({ toPlainOnly: true })
-    password?: string
+  @Exclude({ toPlainOnly: true })
+  password?: string;
 
-    avatar?: string;
+  avatar?: string;
 
-    publicId?: string;
+  publicId?: string;
 
-    socialId: string;
+  socialId: string;
 
-    provider: string;
+  provider: string;
 
-    role: Role;
+  role: Role;
 
-    isEmailVerified: boolean;
+  isEmailVerified: boolean;
 
-    categories: Category[]
+  categories: Category[];
 
-    createdAt: Date;
+  createdAt: Date;
 
-    updatedAt: Date;
+  updatedAt: Date;
 
-    deletedAt: Date;
+  deletedAt: Date;
 }

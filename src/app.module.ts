@@ -55,7 +55,7 @@ import { EventsModule } from 'modules/events/events.module';
         cloudinaryConfig,
         mailerConfig,
         googleConfig,
-        twitterConfig
+        twitterConfig,
       ],
       envFilePath: ['.env'],
     }),
@@ -80,9 +80,9 @@ import { EventsModule } from 'modules/events/events.module';
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
       dataSourceFactory: async (options) => {
-        const dataSource = await new DataSource(options).initialize()
+        const dataSource = await new DataSource(options).initialize();
         return dataSource;
-      }
+      },
     }),
     WinstonModule.forRoot(winstonConfig),
     ClsModule.forRoot({
@@ -92,11 +92,11 @@ import { EventsModule } from 'modules/events/events.module';
     HttpModule.register({
       timeout: 5000,
       maxRedirects: 5,
-      global: true
+      global: true,
     }),
     CacheModule.register({
       isGlobal: true,
-      ttl: 30 * 1000
+      ttl: 30 * 1000,
     }),
     UsersModule,
     AuthModule,

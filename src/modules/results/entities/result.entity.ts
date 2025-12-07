@@ -45,7 +45,9 @@ export class ResultEntity {
 
   @BeforeUpdate()
   updateResultStatus() {
-    if (this.currentIndex > this.questionIds.length - 1)
+    if (this.currentIndex > this.questionIds.length - 1) {
       this.isComplete = true;
+      this.completedAt = new Date();
+    }
   }
 }
