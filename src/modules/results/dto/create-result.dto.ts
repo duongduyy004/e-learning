@@ -6,5 +6,5 @@ export class CreateResultDto {
 
   @IsOptional()
   @IsBoolean()
-  isLearned: boolean
+  isLearned: boolean;
 }
