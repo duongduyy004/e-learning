@@ -16,15 +16,18 @@ import { QueryDto } from 'utils/types/query.dto';
 
 @Controller('results')
 export class ResultsController {
-  constructor(private readonly resultsService: ResultsService) { }
+  constructor(private readonly resultsService: ResultsService) {}
 
   @Post(':categoryId')
   createResult(
     @UserInfo() user: User,
     @Param() createResultDto: CreateResultDto,
-    @Query('isLearned') isLearned: boolean
+    @Query('isLearned') isLearned: boolean,
   ) {
-    return this.resultsService.createResult(user, { ...createResultDto, isLearned });
+    return this.resultsService.createResult(user, {
+      ...createResultDto,
+      isLearned,
+    });
   }
 
   @Get('detail/:id')
@@ -36,7 +39,7 @@ export class ResultsController {
   getCategoryResults(
     @UserInfo() user: User,
     @Param('categoryId') categoryId: string,
-    @Query() queryDto: QueryDto<any, any>
+    @Query() queryDto: QueryDto<any, any>,
   ) {
     return this.resultsService.getResults(
       user.id,
@@ -48,7 +51,7 @@ export class ResultsController {
   @Patch(':resultId')
   submitAnswer(
     @Param('resultId') resultId: number,
-    @Body() submitAnswerDto: SubmitAnswerDto
+    @Body() submitAnswerDto: SubmitAnswerDto,
   ) {
     return this.resultsService.submitAnswer(resultId, submitAnswerDto);
   }

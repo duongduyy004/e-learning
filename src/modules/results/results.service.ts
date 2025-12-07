@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ResultEntity } from './entities/result.entity';
 import { Repository } from 'typeorm';
@@ -23,8 +27,8 @@ export class ResultsService {
     private questionRepository: Repository<QuestionEntity>,
     @InjectRepository(QuestionChoiceEntity)
     private questionChoiceRepository: Repository<QuestionChoiceEntity>,
-    private wordsService: WordsService
-  ) { }
+    private wordsService: WordsService,
+  ) {}
 
   async createResult(user: User, createResultDto: CreateResultDto) {
     const { categoryId } = createResultDto;
@@ -34,12 +38,18 @@ export class ResultsService {
         .createQueryBuilder('question')
         .leftJoinAndSelect('question.word', 'word')
         .where('word.categoryId = :categoryId', { categoryId })
-        .andWhere(qb => {
-          const subQuery = qb.subQuery()
+        .andWhere((qb) => {
+          const subQuery = qb
+            .subQuery()
             .select('wordUser.wordId')
             .from(WordUserEntity, 'wordUser')
             .where('wordUser.userId = :userId', { userId: user.id })
-            .andWhere('wordUser.isLearned = :isLearned', { isLearned: createResultDto.isLearned !== undefined ? !createResultDto.isLearned : null })
+            .andWhere('wordUser.isLearned = :isLearned', {
+              isLearned:
+                createResultDto.isLearned !== undefined
+                  ? !createResultDto.isLearned
+                  : null,
+            })
             .getQuery();
           return `word.id NOT IN ${subQuery}`;
         })
@@ -50,48 +60,49 @@ export class ResultsService {
 
         // While there remain elements to shuffle...
         while (currentIndex != 0) {
-
           // Pick a remaining element...
           let randomIndex = Math.floor(Math.random() * currentIndex);
           currentIndex--;
 
           // And swap it with the current element.
           [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex], array[currentIndex]];
+            array[randomIndex],
+            array[currentIndex],
+          ];
 
           return array;
         }
-      }
-      return questions;
+      };
 
       const result = await this.resultRepository.save(
         this.resultRepository.create({
           user: { id: user.id },
           category: { id: categoryId },
-          questionIds: shuffle(questions.map(item => item.id)),
-        })
-      )
+          questionIds: shuffle(questions.map((item) => item.id)),
+        }),
+      );
 
       return result;
     } catch (error) {
-      throw new UnprocessableEntityException(error.message)
+      throw new UnprocessableEntityException(error.message);
     }
   }
 
   async submitAnswer(resultId: Result['id'], submitResultDto: SubmitAnswerDto) {
     const resultEntity = await this.resultRepository.findOne({
       where: { id: resultId },
-      relations: { resultDetails: true, user: true }
-    })
+      relations: { resultDetails: true, user: true },
+    });
 
-    if (!resultEntity) throw new BadRequestException('Result not found')
+    if (!resultEntity) throw new BadRequestException('Result not found');
 
     const correctAnswer = await this.questionChoiceRepository.findOne({
       where: { question: { id: submitResultDto.questionId }, isCorrect: true },
-      relations: { question: { word: true } }
-    })
+      relations: { question: { word: true } },
+    });
 
-    if (!correctAnswer) throw new BadRequestException('Correct answer not found')
+    if (!correctAnswer)
+      throw new BadRequestException('Correct answer not found');
 
     resultEntity.currentIndex = resultEntity.currentIndex + 1;
 
@@ -100,12 +111,15 @@ export class ResultsService {
         userAnswerId: submitResultDto.userAnswerId,
         correctAnswerId: correctAnswer.id,
         question: { id: submitResultDto.questionId },
-        isCorrect: submitResultDto.userAnswerId === correctAnswer.id
-      })
-    )
+        isCorrect: submitResultDto.userAnswerId === correctAnswer.id,
+      }),
+    );
 
     if (submitResultDto.userAnswerId === correctAnswer.id)
-      await this.wordsService.markWordLearned(correctAnswer.question.word.id, resultEntity.user.id)
+      await this.wordsService.markWordLearned(
+        correctAnswer.question.word.id,
+        resultEntity.user.id,
+      );
 
     return await this.resultRepository.save(resultEntity);
   }
@@ -115,14 +129,14 @@ export class ResultsService {
     pagination: { limit: number; page: number },
     categoryId?: number,
   ) {
-
     const [results, total] = await this.resultRepository.findAndCount({
       where: {
         category: { id: categoryId },
-        user: { id: userId }
+        user: { id: userId },
       },
+      order: { startedAt: 'DESC' },
       relations: {
-        category: true
+        category: true,
       },
       take: pagination.limit,
       skip: (pagination.page - 1) * pagination.limit,
@@ -151,7 +165,7 @@ export class ResultsService {
             choices: true,
           },
         },
-        category: true
+        category: true,
       },
     });
 

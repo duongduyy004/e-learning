@@ -10,7 +10,7 @@ export class AuthTwitterController {
   constructor(
     private authTwitterService: AuthTwitterService,
     private authService: AuthService,
-  ) {}
+  ) { }
 
   @Public()
   @Post('login')
@@ -23,11 +23,10 @@ export class AuthTwitterController {
   async callBackAuth(@Query() query: any, @Res() res: Response) {
     const { code, state } = query;
     const socialData = await this.authTwitterService.getProfile(code, state);
-    const data = this.authService.validateSocialLogin(
+    const data = await this.authService.validateSocialLogin(
       AuthProvidersEnum.twitter,
       socialData,
       res,
     );
-    return;
   }
 }
