@@ -1,21 +1,29 @@
-import { UserEntity } from "modules/users/entities/user.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { NotificationObjectEntity } from "./notification-object.entity";
+import { UserEntity } from 'modules/users/entities/user.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { NotificationObjectEntity } from './notification-object.entity';
 
 @Entity('notification')
 export class NotificationEntity {
-    @PrimaryGeneratedColumn('increment')
-    id: number;
+  @PrimaryGeneratedColumn('increment')
+  id: number;
 
-    @ManyToOne(() => UserEntity)
-    notifier: UserEntity
+  @ManyToOne(() => UserEntity)
+  notifier: UserEntity;
 
-    @ManyToOne(() => NotificationObjectEntity, obj => obj.notification, { cascade: true })
-    object: NotificationObjectEntity
+  @ManyToOne(() => NotificationObjectEntity, (obj) => obj.notification, {
+    cascade: true,
+  })
+  object: NotificationObjectEntity;
 
-    @Column({ default: false })
-    isRead: boolean
+  @Column({ default: false })
+  isRead: boolean;
 
-    @CreateDateColumn()
-    createdAt: Date
+  @CreateDateColumn()
+  createdAt: Date;
 }

@@ -20,16 +20,21 @@ import { PaginationResponseDto } from 'utils/types/pagination-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RelationshipEntity } from './entities/relationship.entity';
 import { ChangePasswordDto } from './dto/change-pasword.dto';
+import { NotificationsService } from 'modules/notifications/notifications.service';
+import { ENTITY_TYPE } from 'modules/notifications/entity.type';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly i18nService: I18nService<I18nTranslations>,
     private readonly dataSource: DataSource,
-    @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
-    @InjectRepository(RelationshipEntity) private relationshipRepository: Repository<RelationshipEntity>,
-    private readonly filesService: FilesService
-  ) { }
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+    @InjectRepository(RelationshipEntity)
+    private relationshipRepository: Repository<RelationshipEntity>,
+    private readonly filesService: FilesService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async isEmailExist(email: string): Promise<boolean> {
     return await this.userRepository.exists({
@@ -39,9 +44,9 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.userRepository.findOne({
-      where: { email }
-    })
-    return user
+      where: { email },
+    });
+    return user;
   }
 
   isValidPassword(password: string, hash: string): Promise<boolean> {
@@ -66,7 +71,7 @@ export class UsersService {
 
   async findUserByToken(refreshToken: string) {
     const user = await this.userRepository.findOne({
-      where: { refreshToken }
+      where: { refreshToken },
     });
     if (!user) return null;
     return user;
@@ -256,6 +261,12 @@ export class UsersService {
     const relationship = await this.relationshipRepository.save(
       this.relationshipRepository.create({ follower: user, following }),
     );
+
+    // Trigger notification for following a user
+    await this.notificationsService.createAndSendNotification(user, {
+      entityTypeId: ENTITY_TYPE.FOLLOW.id,
+      entityId: userId,
+    });
 
     return {
       user,

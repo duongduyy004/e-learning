@@ -7,6 +7,7 @@ import { ResultDetailEntity } from './entities/result-detail.entity';
 import { QuestionEntity } from 'modules/questions/entities/question.entity';
 import { QuestionChoiceEntity } from 'modules/questions/entities/question-choice.entity';
 import { WordsModule } from 'modules/words/words.module';
+import { NotificationsModule } from 'modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { WordsModule } from 'modules/words/words.module';
       QuestionChoiceEntity
     ]),
     WordsModule,
+    NotificationsModule,
   ],
   controllers: [ResultsController],
   providers: [ResultsService],

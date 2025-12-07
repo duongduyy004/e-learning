@@ -6,12 +6,15 @@ import { UsersController } from './user.controller';
 import { FilesService } from 'modules/files/files.service';
 import { RelationshipEntity } from './entities/relationship.entity';
 
+import { NotificationsModule } from 'modules/notifications/notifications.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       UserEntity,
       RelationshipEntity
-    ])
+    ]),
+    NotificationsModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, FilesService],

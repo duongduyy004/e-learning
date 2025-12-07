@@ -54,7 +54,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
         cloudinaryConfig,
         mailerConfig,
         googleConfig,
-        twitterConfig
+        twitterConfig,
       ],
       envFilePath: ['.env'],
     }),
@@ -79,9 +79,9 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
       dataSourceFactory: async (options) => {
-        const dataSource = await new DataSource(options).initialize()
+        const dataSource = await new DataSource(options).initialize();
         return dataSource;
-      }
+      },
     }),
     WinstonModule.forRoot(winstonConfig),
     ClsModule.forRoot({
@@ -91,11 +91,11 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     HttpModule.register({
       timeout: 5000,
       maxRedirects: 5,
-      global: true
+      global: true,
     }),
     CacheModule.register({
       isGlobal: true,
-      ttl: 30 * 1000
+      ttl: 30 * 1000,
     }),
     UsersModule,
     AuthModule,
@@ -109,7 +109,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     WordsModule,
     QuestionsModule,
     ResultsModule,
-    NotificationsModule
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
