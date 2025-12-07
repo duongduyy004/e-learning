@@ -62,7 +62,6 @@ export class ResultsService {
           return array;
         }
       }
-      return questions;
 
       const result = await this.resultRepository.save(
         this.resultRepository.create({

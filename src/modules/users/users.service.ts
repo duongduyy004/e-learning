@@ -20,6 +20,8 @@ import { PaginationResponseDto } from 'utils/types/pagination-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RelationshipEntity } from './entities/relationship.entity';
 import { ChangePasswordDto } from './dto/change-pasword.dto';
+import { NotificationsService } from 'modules/notifications/notifications.service';
+import { ENTITY_TYPE } from 'modules/notifications/entity.type';
 
 @Injectable()
 export class UsersService {
@@ -28,7 +30,8 @@ export class UsersService {
     private readonly dataSource: DataSource,
     @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
     @InjectRepository(RelationshipEntity) private relationshipRepository: Repository<RelationshipEntity>,
-    private readonly filesService: FilesService
+    private readonly filesService: FilesService,
+    private readonly notificationsService: NotificationsService
   ) { }
 
   async isEmailExist(email: string): Promise<boolean> {
@@ -252,6 +255,12 @@ export class UsersService {
     });
 
     if (exists) throw new BadRequestException('Already following this user');
+
+    await this.notificationsService.saveNotification({
+      actorId: user.id,
+      entityId: userId,
+      entityTypeId: ENTITY_TYPE.FOLLOW.id
+    })
 
     const relationship = await this.relationshipRepository.save(
       this.relationshipRepository.create({ follower: user, following }),

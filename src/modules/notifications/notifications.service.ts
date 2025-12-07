@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotificationEntity } from './entities/notification.entity';
 import { Repository } from 'typeorm';
@@ -17,22 +17,32 @@ export class NotificationsService {
     ) { }
 
     async saveNotification(createNotificationDto: CreateNotificationDto) {
-        const followers = await this.relationshipRepository.find({
-            where: { following: { id: createNotificationDto.actorId } },
-        })
-
-        const notifications = followers.map(item => (
-            this.notificationRepository.create({
-                notifier: { id: item.id },
-                object: {
-                    actor: { id: createNotificationDto.actorId },
-                    entityId: createNotificationDto.entityId,
-                    entityTypeId: createNotificationDto.entityTypeId
-                }
+        try {
+            const followers = await this.relationshipRepository.find({
+                where: { following: { id: createNotificationDto.actorId } },
+                relations: { follower: true }
             })
-        ))
 
-        await this.notificationRepository.save(notifications);
-        return;
+            const notifications = followers.map(item => (
+                this.notificationRepository.create({
+                    notifier: { id: item.follower.id },
+                    object: {
+                        actor: { id: createNotificationDto.actorId },
+                        entityId: createNotificationDto.entityId,
+                        entityTypeId: createNotificationDto.entityTypeId
+                    }
+                })
+            ))
+
+            await this.notificationRepository.save(notifications);
+            return;
+        } catch (error) {
+            throw new BadRequestException(error.message)
+        }
+
+    }
+
+    async sendNotification() {
+
     }
 }

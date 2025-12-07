@@ -7,6 +7,7 @@ import { ResultDetailEntity } from './entities/result-detail.entity';
 import { QuestionEntity } from 'modules/questions/entities/question.entity';
 import { QuestionChoiceEntity } from 'modules/questions/entities/question-choice.entity';
 import { WordsModule } from 'modules/words/words.module';
+import { ResultSubscriber } from './results.subscriber';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { WordsModule } from 'modules/words/words.module';
     WordsModule,
   ],
   controllers: [ResultsController],
-  providers: [ResultsService],
+  providers: [ResultsService, ResultSubscriber],
 })
 export class ResultsModule { }
