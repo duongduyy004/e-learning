@@ -151,10 +151,10 @@ export class NotificationsService {
 
     return {
       meta: {
-        totalItems: totalItems,
         page: pagination.page,
         limit: pagination.limit,
-        totalPages: totalPage,
+        totalPage,
+        totalItems,
       },
       items: mapDataItems,
     };

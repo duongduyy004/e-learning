@@ -113,6 +113,8 @@ export class WordsService {
         wordUser: true,
         category: true
       },
+      skip: (paginationOptions.page - 1) * paginationOptions.limit,
+      take: paginationOptions.limit,
       order: sortOptions?.reduce(
         (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
         {},
