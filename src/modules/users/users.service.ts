@@ -258,6 +258,12 @@ export class UsersService {
 
     if (exists) throw new BadRequestException('Already following this user');
 
+    await this.notificationsService.saveNotification({
+      actorId: user.id,
+      entityId: userId,
+      entityTypeId: ENTITY_TYPE.FOLLOW.id
+    })
+
     const relationship = await this.relationshipRepository.save(
       this.relationshipRepository.create({ follower: user, following }),
     );

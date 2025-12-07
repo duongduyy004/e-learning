@@ -42,6 +42,7 @@ import { WordsModule } from 'modules/words/words.module';
 import { QuestionsModule } from 'modules/questions/questions.module';
 import { ResultsModule } from 'modules/results/results.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { EventsModule } from 'modules/events/events.module';
 
 @Module({
   imports: [
@@ -110,6 +111,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     QuestionsModule,
     ResultsModule,
     NotificationsModule,
+    EventsModule
   ],
   controllers: [AppController],
   providers: [
