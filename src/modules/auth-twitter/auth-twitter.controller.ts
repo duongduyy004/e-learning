@@ -23,7 +23,7 @@ export class AuthTwitterController {
 
   @Public()
   @Get('callback')
-  async callBackAuth(@Query() query: any, @Res({ passthrough: true }) res: Response) {
+  async callBackAuth(@Query() query: any, @Res() res: Response) {
     const frontendDomain = this.configService.get('app.frontendDomain', { infer: true })
     const { code, state } = query;
     const socialData = await this.authTwitterService.getProfile(code, state);
@@ -32,6 +32,6 @@ export class AuthTwitterController {
       socialData,
       res,
     );
-    res.redirect(frontendDomain);
+    return res.redirect(frontendDomain);
   }
 }
