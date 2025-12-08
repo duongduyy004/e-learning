@@ -345,7 +345,7 @@ export class AuthService {
       maxAge: 2592000 * 1000,
       secure: true,
       sameSite: 'none',
-      domain: '.vercel.app',
+      domain: 'e-learning-fe-ebon.vercel.app/',
       path: '/'
     });
 
