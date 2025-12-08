@@ -18,7 +18,7 @@ services:
     container_name: e-learning-app
     environment:
       - DATABASE_HOST=e-learning-db
-      - DATABASE_PORT=2345
+      - DATABASE_PORT=5432
       - DATABASE_USERNAME=root
       - DATABASE_PASSWORD=123456
       - DATABASE_NAME=e-learning
