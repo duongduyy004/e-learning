@@ -26,5 +26,21 @@ export class RoleSeedService {
                 { listeners: false }
             );
         }
+
+        const countUser = await this.repository.count({
+            where: {
+                id: RoleEnum.user,
+            },
+        });
+
+        if (!countUser) {
+            await this.repository.save(
+                this.repository.create({
+                    id: RoleEnum.user,
+                    name: 'User',
+                }),
+                { listeners: false }
+            );
+        }
     }
 }
