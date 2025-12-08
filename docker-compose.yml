@@ -18,10 +18,10 @@ services:
     container_name: e-learning-app
     environment:
       - DATABASE_HOST=e-learning-db
-      - DATABASE_PORT=5432
+      - DATABASE_PORT=2345
       - DATABASE_USERNAME=root
       - DATABASE_PASSWORD=123456
-      - DATABASE_NAME=postgres
+      - DATABASE_NAME=e-learning
       - DATABASE_TYPE=postgres
       - DATABASE_SSL_MODE=false
       - DATABASE_CHANNEL_BINDING=require
