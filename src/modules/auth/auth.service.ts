@@ -342,8 +342,9 @@ export class AuthService {
     const refreshToken = this.createRefreshToken(payload);
     response.cookie('refresh_token', refreshToken, {
       httpOnly: true,
+      secure: true,
       maxAge: 2592000 * 1000,
-      sameSite: 'strict',
+      sameSite: 'none',
       domain: '.myvnc.com'
     });
 
