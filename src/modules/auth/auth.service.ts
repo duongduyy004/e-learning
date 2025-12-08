@@ -343,6 +343,7 @@ export class AuthService {
     response.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       maxAge: 2592000 * 1000,
+      domain: 'e-learning-fe-ebon.vercel.app'
     });
 
     await this.usersService.updateUserToken(user, refreshToken);
