@@ -344,7 +344,7 @@ export class AuthService {
       httpOnly: true,
       maxAge: 2592000 * 1000,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'strict',
       domain: '.myvnc.com',
       path: '/'
     });
