@@ -40,7 +40,7 @@ export class AuthService {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: {
-          email: `needLoginViaProvider:${user.provider}`,
+          email: `needLoginViaProvider:${user?.provider}`,
         },
       });
     }
