@@ -343,10 +343,8 @@ export class AuthService {
     response.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       maxAge: 2592000 * 1000,
-      secure: true,
       sameSite: 'strict',
-      domain: '.myvnc.com',
-      path: '/'
+      domain: '.myvnc.com'
     });
 
     await this.usersService.updateUserToken(user, refreshToken);
