@@ -30,7 +30,7 @@ export class CategoryService {
       this.categoryRepository.create({ title: createCategoryDto.title, isPublic: createCategoryDto.isPublic ?? false }),
     );
 
-    if (createCategoryDto.words.length > 0)
+    if (createCategoryDto.words && createCategoryDto.words.length > 0)
       await this.wordService.createWords(createCategoryDto.words, category.id);
     return CategoryMapper.toDomain(category);
   }
