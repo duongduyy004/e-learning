@@ -17,7 +17,7 @@ import { QueryDto } from 'utils/types/query.dto';
 
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) { }
+  constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
   getNotifications(

@@ -27,7 +27,7 @@ export class NotificationsService {
     private userRepository: Repository<UserEntity>,
     private notificationsGateway: NotificationsGateway,
     private dataSource: DataSource,
-  ) { }
+  ) {}
 
   async createAndSendNotification(
     user: User,
@@ -53,8 +53,26 @@ export class NotificationsService {
         });
 
         // No followers to notify
-        if (!followers.length) {
-          return;
+        if (followers.length === 0) {
+          if (createNotificationDto.entityTypeId === ENTITY_TYPE.FOLLOW.id) {
+            notificationsToSave = manager.create(NotificationEntity, {
+              notifier: { id: createNotificationDto.entityId },
+              object: { id: newNotificationObject.id },
+              isRead: false,
+            });
+          } else {
+            // No follower to notify the result action
+            return;
+          }
+        } else {
+          // 4. Create Notification entities
+          notificationsToSave = followers.map((item) =>
+            manager.create(NotificationEntity, {
+              notifier: { id: item.follower.id },
+              object: { id: newNotificationObject.id },
+              isRead: false,
+            }),
+          );
         }
 
         // 4. Create Notification entities
@@ -119,10 +137,18 @@ export class NotificationsService {
       .leftJoinAndSelect('notification.object', 'object')
       .leftJoinAndSelect('object.actor', 'actor')
       .addSelect(['actor.name', 'actor.avatar'])
-      .where('notification.notifier.id = :userId', { userId })
+      .where('notification.notifier.id = :userId', { userId });
+
+    if (filterOptions) {
+      qb.andWhere('notification.isRead = :isRead', {
+        isRead: filterOptions.isRead,
+      });
+    }
+
+    const [items, total] = await qb
       .orderBy('notification.createdAt', 'DESC')
-      .skip((pagination.page - 1) * pagination.limit)
-      .take(pagination.limit)
+      .skip((paginationOptions.page - 1) * paginationOptions.limit)
+      .take(paginationOptions.limit)
       .getManyAndCount();
 
     const totalItems = total;
@@ -162,7 +188,10 @@ export class NotificationsService {
 
   async markAsRead(idOrIds: number | number[]) {
     const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
-    return await this.notificationRepository.update({ id: In(ids) }, { isRead: true });
+    return await this.notificationRepository.update(
+      { id: In(ids) },
+      { isRead: true },
+    );
   }
 
   private async getEntityData(entityTypeId: number, entityId: number) {

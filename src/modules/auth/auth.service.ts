@@ -31,7 +31,7 @@ export class AuthService {
     private i18nService: I18nService<I18nTranslations>,
     private configService: ConfigService<AllConfigType>,
     private readonly mailService: MailService,
-  ) { }
+  ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
@@ -75,7 +75,7 @@ export class AuthService {
   }
 
   async login(user: User, response: Response) {
-    const { id, name, email, role, avatar, publicId } = user
+    const { id, name, email, role, avatar, publicId } = user;
     const payload = {
       sub: 'token login',
       iss: 'server',
@@ -103,9 +103,14 @@ export class AuthService {
         }),
       }),
       user: {
-        id, name, email, role, avatar, publicId
-      }
-    }
+        id,
+        name,
+        email,
+        role,
+        avatar,
+        publicId,
+      },
+    };
   }
 
   createRefreshToken = (payload: any) => {
@@ -123,7 +128,7 @@ export class AuthService {
       const user = await this.usersService.findUserByToken(refreshToken);
 
       if (user) {
-        const { id, name, email, role, avatar, publicId } = user
+        const { id, name, email, role, avatar, publicId } = user;
         const payload = {
           sub: 'token login',
           iss: 'server',
@@ -153,9 +158,14 @@ export class AuthService {
             ),
           }),
           user: {
-            id, name, email, role, avatar, publicId
-          }
-        }
+            id,
+            name,
+            email,
+            role,
+            avatar,
+            publicId,
+          },
+        };
       } else {
         throw new NotFoundException(
           this.i18nService.t('common.NOT_FOUND', {
@@ -345,7 +355,7 @@ export class AuthService {
       secure: true,
       maxAge: 2592000 * 1000,
       sameSite: 'none',
-      domain: '.myvnc.com'
+      domain: '.myvnc.com',
     });
 
     await this.usersService.updateUserToken(user, refreshToken);
