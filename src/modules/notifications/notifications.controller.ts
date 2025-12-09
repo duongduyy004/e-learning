@@ -14,10 +14,11 @@ import { NotificationsService } from './notifications.service';
 import { UserInfo } from '@/decorator/customize.decorator';
 import { User } from '../users/user.domain';
 import { QueryDto } from 'utils/types/query.dto';
+import { MarkAsReadDto } from './dto/mark-read.dto';
 
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) { }
+  constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
   getNotifications(
@@ -25,8 +26,11 @@ export class NotificationsController {
     @Query() queryDto: QueryDto<any, any>,
   ) {
     return this.notificationsService.getNotifications(user.id, {
-      limit: queryDto.limit,
-      page: queryDto.page,
+      filterOptions: queryDto.filters,
+      paginationOptions: {
+        limit: queryDto.limit,
+        page: queryDto.page,
+      },
     });
   }
 
@@ -41,8 +45,8 @@ export class NotificationsController {
     );
   }
 
-  @Patch('read')
-  markAsRead(@Body('ids') ids: number[]) {
-    return this.notificationsService.markAsRead(ids);
+  @Patch('')
+  markAsRead(@Body() markAsReadDto: MarkAsReadDto) {
+    return this.notificationsService.markAsRead(markAsReadDto.notificationIds);
   }
 }
