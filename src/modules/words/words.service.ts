@@ -98,10 +98,12 @@ export class WordsService {
     if (filterOptions?.meaning) {
       qb.orWhere('word.meaning ILIKE :meaning', { meaning: `%${filterOptions.meaning}%` });
     }
-    if (filterOptions?.isLearned !== undefined) {
-      qb.andWhere('wordUser.isLearned = :isLearned', { isLearned: filterOptions.isLearned });
+    if (filterOptions?.isLearned === true) {
+      qb.andWhere('wordUser.isLearned = :isLearned', { isLearned: true });
     }
-
+    if (filterOptions?.isLearned === false) {
+      qb.andWhere('(wordUser.isLearned = false OR wordUser.userId IS NULL)');
+    }
     // Pagination and sorting
     qb.skip((paginationOptions.page - 1) * paginationOptions.limit)
       .take(paginationOptions.limit);
