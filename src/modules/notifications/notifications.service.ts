@@ -118,7 +118,7 @@ export class NotificationsService {
             notification.notifier.id,
             {
               ...notificationPayload,
-              isRead: notification.isRead || false,
+              isRead: notification?.isRead || false,
               createdAt: notification.createdAt,
             },
           );
@@ -128,7 +128,7 @@ export class NotificationsService {
         savedNotifications.notifier.id,
         {
           ...notificationPayload,
-          isRead: savedNotifications[0].isRead || false,
+          isRead: savedNotifications[0]?.isRead || false,
           createdAt: savedNotifications[0].createdAt,
         },
       );
