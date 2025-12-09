@@ -13,6 +13,9 @@ import { NotificationObjectEntity } from './entities/notification-object.entity'
 import { ENTITY_TYPE } from './entity.type';
 import { UserEntity } from 'modules/users/entities/user.entity';
 import { User } from 'modules/users/user.domain';
+import { IPaginationOptions } from 'utils/types/pagination-options';
+import { FilterNotificationDto } from './dto/filter-notification.dto';
+import { MarkAsReadDto } from './dto/mark-read.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -52,6 +55,8 @@ export class NotificationsService {
           relations: ['follower'],
         });
 
+        let notificationsToSave;
+
         // No followers to notify
         if (followers.length === 0) {
           if (createNotificationDto.entityTypeId === ENTITY_TYPE.FOLLOW.id) {
@@ -74,16 +79,6 @@ export class NotificationsService {
             }),
           );
         }
-
-        // 4. Create Notification entities
-        const notificationsToSave = followers.map((item) =>
-          manager.create(NotificationEntity, {
-            notifier: { id: item.follower.id },
-            object: { id: newNotificationObject.id } as any,
-            isRead: false,
-          }),
-        );
-
         const savedNotifications = await manager.save(notificationsToSave);
 
         return {
@@ -100,8 +95,8 @@ export class NotificationsService {
       return [];
     }
 
-    const { savedNotifications, actorData, newNotificationObject } =
-      transactionResult;
+    const { savedNotifications, newNotificationObject } = transactionResult;
+
     // Get Entity Data
     const entityData = await this.getEntityData(
       newNotificationObject.entityTypeId,
@@ -116,35 +111,52 @@ export class NotificationsService {
     };
 
     // 5. Send Real-time Notification
-    savedNotifications.forEach((notification) => {
-      if (notification.notifier) {
-        this.notificationsGateway.sendNotification(
-          notification.notifier.id,
-          notificationPayload,
+    Array.isArray(savedNotifications)
+      ? savedNotifications.forEach((notification) => {
+          if (notification.notifier) {
+            this.notificationsGateway.sendNotification(
+              notification.notifier.id,
+              {
+                ...notificationPayload,
+                isRead: notification.isRead,
+                createdAt: notification.createdAt,
+              },
+            );
+          }
+        })
+      : this.notificationsGateway.sendNotification(
+          savedNotifications.notifier.id,
+          {
+            ...notificationPayload,
+            isRead: savedNotifications[0].isRead,
+            createdAt: savedNotifications[0].createdAt,
+          },
         );
-      }
-    });
 
     return savedNotifications;
   }
 
   async getNotifications(
     userId: number,
-    pagination: { limit: number; page: number },
+    {
+      paginationOptions,
+      filterOptions,
+    }: {
+      filterOptions?: FilterNotificationDto;
+      paginationOptions: IPaginationOptions;
+    },
   ) {
-    const [items, total] = await this.notificationRepository
+    const qb = this.notificationRepository
       .createQueryBuilder('notification')
       .leftJoinAndSelect('notification.object', 'object')
       .leftJoinAndSelect('object.actor', 'actor')
       .addSelect(['actor.name', 'actor.avatar'])
       .where('notification.notifier.id = :userId', { userId });
-
     if (filterOptions) {
       qb.andWhere('notification.isRead = :isRead', {
         isRead: filterOptions.isRead,
       });
     }
-
     const [items, total] = await qb
       .orderBy('notification.createdAt', 'DESC')
       .skip((paginationOptions.page - 1) * paginationOptions.limit)
@@ -152,7 +164,7 @@ export class NotificationsService {
       .getManyAndCount();
 
     const totalItems = total;
-    const totalPage = Math.ceil(total / pagination.limit);
+    const totalPage = Math.ceil(total / paginationOptions.limit);
 
     const mapDataItems = await Promise.all(
       items.map(async (item) => {
@@ -177,8 +189,8 @@ export class NotificationsService {
 
     return {
       meta: {
-        page: pagination.page,
-        limit: pagination.limit,
+        page: paginationOptions.page,
+        limit: paginationOptions.limit,
         totalPage,
         totalItems,
       },
@@ -186,10 +198,10 @@ export class NotificationsService {
     };
   }
 
-  async markAsRead(idOrIds: number | number[]) {
-    const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
+  async markAsRead(ids: number | number[]) {
+    const notificationIds = Array.isArray(ids) ? ids : [ids];
     return await this.notificationRepository.update(
-      { id: In(ids) },
+      { id: In(notificationIds) },
       { isRead: true },
     );
   }
