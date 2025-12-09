@@ -30,7 +30,7 @@ export class NotificationsService {
     private userRepository: Repository<UserEntity>,
     private notificationsGateway: NotificationsGateway,
     private dataSource: DataSource,
-  ) {}
+  ) { }
 
   async createAndSendNotification(
     user: User,
@@ -113,25 +113,25 @@ export class NotificationsService {
     // 5. Send Real-time Notification
     Array.isArray(savedNotifications)
       ? savedNotifications.forEach((notification) => {
-          if (notification.notifier) {
-            this.notificationsGateway.sendNotification(
-              notification.notifier.id,
-              {
-                ...notificationPayload,
-                isRead: notification.isRead,
-                createdAt: notification.createdAt,
-              },
-            );
-          }
-        })
+        if (notification.notifier) {
+          this.notificationsGateway.sendNotification(
+            notification.notifier.id,
+            {
+              ...notificationPayload,
+              isRead: notification.isRead || false,
+              createdAt: notification.createdAt,
+            },
+          );
+        }
+      })
       : this.notificationsGateway.sendNotification(
-          savedNotifications.notifier.id,
-          {
-            ...notificationPayload,
-            isRead: savedNotifications[0].isRead,
-            createdAt: savedNotifications[0].createdAt,
-          },
-        );
+        savedNotifications.notifier.id,
+        {
+          ...notificationPayload,
+          isRead: savedNotifications[0].isRead || false,
+          createdAt: savedNotifications[0].createdAt,
+        },
+      );
 
     return savedNotifications;
   }
