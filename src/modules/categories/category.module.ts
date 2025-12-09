@@ -11,6 +11,7 @@ import { WordsModule } from 'modules/words/words.module';
     TypeOrmModule.forFeature([CategoryEntity]),
     WordsModule],
   controllers: [CategoryController],
-  providers: [CategoryService]
+  providers: [CategoryService],
+  exports: [CategoryService]
 })
 export class CategoryModule { }

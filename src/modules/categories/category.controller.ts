@@ -47,6 +47,13 @@ export class CategoryController {
     return this.categoryService.addCategoryToUser(+data.userId, +data.categoryId);
   }
 
+  @Patch('restore/:categoryId')
+  restore(
+    @Param('categoryId') categoryId: Category['id']
+  ) {
+    return this.categoryService.restoreCategory(categoryId)
+  }
+
   @Patch(':categoryId')
   update(
     @Param('categoryId') id: Category['id'],

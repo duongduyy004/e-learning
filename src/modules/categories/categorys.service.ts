@@ -40,6 +40,9 @@ export class CategoryService {
       where: { id },
       relations: { words: { question: { choices: true } } },
     });
+
+    if (!category) return null;
+
     return CategoryMapper.toDomain(category);
   }
 
@@ -67,6 +70,7 @@ export class CategoryService {
         {},
       ),
       relations: { words: { question: { choices: true } } },
+      withDeleted: true
     });
 
     const totalItems = total;
@@ -123,7 +127,11 @@ export class CategoryService {
   }
 
   async deleteCategory(id: Category['id']) {
-    return this.categoryRepository.delete({ id });
+    return this.categoryRepository.softDelete({ id });
+  }
+
+  async restoreCategory(id: Category['id']) {
+    return this.categoryRepository.restore({ id })
   }
 
   async addCategoryToUser(userId: number, categoryId: number) {
@@ -154,6 +162,7 @@ export class CategoryService {
 
   async getUserCategories(user: User) {
     const userCates = await this.categoryRepository.createQueryBuilder('cate')
+      .withDeleted()
       .leftJoin('cate.users', 'cateUser')
       .where('cate.isPublic = true')
       .orWhere('cateUser.id = :userId', { userId: user.id })

@@ -18,6 +18,7 @@ import { WordsService } from 'modules/words/words.service';
 import { NotificationsService } from 'modules/notifications/notifications.service';
 import { ENTITY_TYPE } from 'modules/notifications/entity.type';
 import { UserMapper } from 'modules/users/user.mapper';
+import { CategoryService } from 'modules/categories/categorys.service';
 
 @Injectable()
 export class ResultsService {
@@ -32,10 +33,15 @@ export class ResultsService {
     private questionChoiceRepository: Repository<QuestionChoiceEntity>,
     private wordsService: WordsService,
     private notificationsService: NotificationsService,
-  ) {}
+    private categoryService: CategoryService
+  ) { }
 
   async createResult(user: User, createResultDto: CreateResultDto) {
     const { categoryId } = createResultDto;
+
+    const category = await this.categoryService.getCategory(categoryId);
+    if (!category)
+      throw new UnprocessableEntityException('The category was deleted')
 
     try {
       const questions = await this.questionRepository

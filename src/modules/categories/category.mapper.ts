@@ -7,6 +7,7 @@ export class CategoryMapper {
 
         domainEntity.id = raw.id;
         domainEntity.title = raw.title;
+        domainEntity.isPublic = raw.isPublic;
         if (raw.words) {
             domainEntity.words = raw.words.map(item => ({
                 id: item.id,
@@ -19,6 +20,7 @@ export class CategoryMapper {
                 }))
             }))
         }
+        domainEntity.deletedAt = raw.deletedAt;
         return domainEntity;
     }
 }

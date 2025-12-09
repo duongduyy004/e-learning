@@ -5,5 +5,9 @@ export class Category {
 
     title: string;
 
+    isPublic: boolean;
+
     words?: Partial<Word>[]
+
+    deletedAt: Date
 }

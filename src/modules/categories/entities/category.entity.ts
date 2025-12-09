@@ -1,6 +1,6 @@
 import { UserEntity } from "modules/users/entities/user.entity";
 import { WordEntity } from "modules/words/entities/word.entity";
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('category')
 export class CategoryEntity {
@@ -18,4 +18,7 @@ export class CategoryEntity {
 
     @ManyToMany(() => UserEntity, user => user.categories)
     users: UserEntity[]
+
+    @DeleteDateColumn()
+    deletedAt: Date;
 }
