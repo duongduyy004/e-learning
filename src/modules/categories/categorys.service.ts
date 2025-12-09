@@ -161,13 +161,21 @@ export class CategoryService {
   }
 
   async getUserCategories(user: User) {
-    const userCates = await this.categoryRepository.createQueryBuilder('cate')
+    const userCates = await this.categoryRepository
+      .createQueryBuilder('cate')
       .withDeleted()
       .leftJoin('cate.users', 'cateUser')
+      .leftJoin('cate.words', 'words')
+      .addSelect('COUNT(words.id)', 'cate_totalWords')
       .where('cate.isPublic = true')
       .orWhere('cateUser.id = :userId', { userId: user.id })
-      .getMany()
+      .groupBy('cate.id')
+      .getRawAndEntities();
 
-    return userCates;
+    // Map the raw count to each entity
+    return userCates.entities.map((cate, index) => ({
+      ...cate,
+      totalWords: parseInt(userCates.raw[index].cate_totalWords) || 0,
+    }));
   }
 }
