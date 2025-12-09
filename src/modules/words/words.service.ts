@@ -98,7 +98,7 @@ export class WordsService {
     if (filterOptions?.meaning) {
       qb.orWhere('word.meaning ILIKE :meaning', { meaning: `%${filterOptions.meaning}%` });
     }
-    if (filterOptions?.isLearned === true) {
+    if (filterOptions?.isLearned !== undefined) {
       qb.andWhere('wordUser.isLearned = :isLearned', { isLearned: filterOptions.isLearned });
     }
 
