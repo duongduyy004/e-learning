@@ -84,42 +84,35 @@ export class WordsService {
     },
   ) {
 
-    const where: FindOptionsWhere<WordEntity> = {};
+    const qb = this.wordRepository.createQueryBuilder('word')
+      .leftJoinAndSelect('word.wordUser', 'wordUser', 'wordUser.userId = :userId', { userId })
+      .leftJoinAndSelect('word.category', 'category');
 
+    // Example OR conditions
     if (filterOptions?.categoryIds && filterOptions.categoryIds.length > 0) {
-      where.category = { id: In(filterOptions.categoryIds) }
+      qb.where('word.categoryId IN (:...categoryIds)', { categoryIds: filterOptions.categoryIds });
     }
-
     if (filterOptions?.content) {
-      where.content = ILike(`%${filterOptions.content}%`)
+      qb.orWhere('word.content ILIKE :content', { content: `%${filterOptions.content}%` });
     }
-
-
     if (filterOptions?.meaning) {
-      where.meaning = ILike(`%${filterOptions.meaning}%`)
+      qb.orWhere('word.meaning ILIKE :meaning', { meaning: `%${filterOptions.meaning}%` });
+    }
+    if (filterOptions?.isLearned === true) {
+      qb.andWhere('wordUser.isLearned = :isLearned', { isLearned: filterOptions.isLearned });
     }
 
-    // if (filterOptions?.isLearned === true || filterOptions?.isLearned === false) {
-    //   where.wordUser = { isLearned: filterOptions.isLearned, userId }
-    // }
+    // Pagination and sorting
+    qb.skip((paginationOptions.page - 1) * paginationOptions.limit)
+      .take(paginationOptions.limit);
 
+    if (sortOptions?.length) {
+      sortOptions.forEach(s => {
+        qb.addOrderBy(`word.${s.orderBy}`, s.order);
+      });
+    }
 
-    const [entities, total] = await this.wordRepository.findAndCount({
-      where: {
-        ...where,
-        wordUser: { isLearned: filterOptions.isLearned, userId }
-      },
-      relations: {
-        wordUser: true,
-        category: true
-      },
-      skip: (paginationOptions.page - 1) * paginationOptions.limit,
-      take: paginationOptions.limit,
-      order: sortOptions?.reduce(
-        (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
-        {},
-      )
-    })
+    const [entities, total] = await qb.getManyAndCount();
 
     const totalItems = total;
     const totalPages = Math.ceil(totalItems / paginationOptions.limit);
