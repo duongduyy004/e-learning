@@ -24,6 +24,7 @@ export class QuestionEntity {
 
   @OneToMany(() => QuestionChoiceEntity, (choices) => choices.question, {
     cascade: true,
+    onDelete: 'CASCADE'
   })
   choices: QuestionChoiceEntity[];
 }

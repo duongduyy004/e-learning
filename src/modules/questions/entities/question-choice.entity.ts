@@ -12,6 +12,6 @@ export class QuestionChoiceEntity {
   @Column({ default: false })
   isCorrect: boolean;
 
-  @ManyToOne(() => QuestionEntity, (question) => question.choices)
+  @ManyToOne(() => QuestionEntity, (question) => question.choices, { onDelete: 'CASCADE' })
   question?: QuestionEntity;
 }
