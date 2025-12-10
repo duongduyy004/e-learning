@@ -133,7 +133,8 @@ export class UsersService {
     sortOptions?: SortUsersDto[];
     paginationOptions: IPaginationOptions;
   }): Promise<PaginationResponseDto<User>> {
-    const qb = this.userRepository.createQueryBuilder('user');
+    const qb = this.userRepository.createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role');
 
     if (filterOptions?.name && filterOptions?.email) {
       qb.where('user.name ILIKE :name', { name: `%${filterOptions.name}%` })
