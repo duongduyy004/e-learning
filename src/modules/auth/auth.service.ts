@@ -215,7 +215,7 @@ export class AuthService {
       });
       const userData = this.jwtService.decode(token);
 
-      const { id, email } = userData;
+      const { email } = userData;
 
       const user = await this.usersService.findByEmail(email);
 
@@ -228,8 +228,7 @@ export class AuthService {
         });
       }
       // Change status of isEmailVerified
-      user.isEmailVerified = true;
-      const updatedUser = await this.usersService.updateUser(id, user);
+      const updatedUser = await this.usersService.updateUser(user.id, { isEmailVerified: true });
 
       if (!isValidToken) return false;
       return 'valid token';
