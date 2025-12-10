@@ -22,6 +22,7 @@ import { SocialInterface } from 'modules/social/social.interface';
 import { RoleEnum } from 'modules/roles/roles.enum';
 import { UserEntity } from 'modules/users/entities/user.entity';
 import { AuthProvidersEnum } from './auth-providers.enum';
+import { UserMapper } from 'modules/users/user.mapper';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +32,7 @@ export class AuthService {
     private i18nService: I18nService<I18nTranslations>,
     private configService: ConfigService<AllConfigType>,
     private readonly mailService: MailService,
-  ) {}
+  ) { }
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
@@ -45,7 +46,7 @@ export class AuthService {
       });
     }
 
-    if (!user?.password) {
+    if (!user?.password || !user?.isEmailVerified) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: {
@@ -63,11 +64,15 @@ export class AuthService {
   }
 
   async signUp(signupDto: SignUpDto) {
-    return this.usersService.createUser({
+    const user = await this.usersService.createUser({
       email: signupDto.email,
       name: signupDto.name,
       password: signupDto.password,
     });
+
+    await this.sendVerifyEmail(UserMapper.toDomain(user));
+
+    return user;
   }
 
   async logout(user: User) {
@@ -240,6 +245,9 @@ export class AuthService {
 
     if (!user)
       throw new BadRequestException(this.i18nService.t('auth.EMAIL_NOT_EXIST'));
+
+    if (user && user.provider !== AuthProvidersEnum.email)
+      throw new BadRequestException(`Your account was login via ${user.provider}. You cannot forgot password`)
 
     if (!user.isEmailVerified)
       throw new UnprocessableEntityException(
