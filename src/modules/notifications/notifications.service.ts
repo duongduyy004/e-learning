@@ -179,7 +179,7 @@ export class NotificationsService {
         const notificationPayload = {
           ...notification,
           ...itemData,
-          actor: { name: object.actor.name, avatar: object.actor.avatar },
+          actor: { name: object?.actor?.name || 'Deleted User', avatar: object?.actor?.avatar || null },
           notificationData: entityData,
         };
 
