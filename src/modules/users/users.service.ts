@@ -202,7 +202,10 @@ export class UsersService {
 
   async resetPassword(email: string, newPassword: string) {
     const user = await this.userRepository.findOne({ where: { email } });
-    user.password = newPassword;
+    const saltRounds = 10;
+    const salt = bcrypt.genSaltSync(saltRounds);
+
+    user.password = await bcrypt.hash(newPassword, salt);
     return await this.userRepository.save(user);
   }
 
