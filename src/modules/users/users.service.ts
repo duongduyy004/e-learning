@@ -133,25 +133,28 @@ export class UsersService {
     sortOptions?: SortUsersDto[];
     paginationOptions: IPaginationOptions;
   }): Promise<PaginationResponseDto<User>> {
-    const where: FindOptionsWhere<UserEntity> = {};
+    const qb = this.userRepository.createQueryBuilder('user');
 
-    if (filterOptions?.name) {
-      where.name = ILike(`%${filterOptions.name}%`);
+    if (filterOptions?.name && filterOptions?.email) {
+      qb.where('user.name ILIKE :name', { name: `%${filterOptions.name}%` })
+        .orWhere('user.email ILIKE :email', { email: `%${filterOptions.email}%` });
+    } else if (filterOptions?.name) {
+      qb.where('user.name ILIKE :name', { name: `%${filterOptions.name}%` });
+    } else if (filterOptions?.email) {
+      qb.where('user.email ILIKE :email', { email: `%${filterOptions.email}%` });
     }
 
-    if (filterOptions?.email) {
-      where.email = ILike(`%${filterOptions.email}%`);
+    if (sortOptions?.length) {
+      sortOptions.forEach(s => {
+        qb.addOrderBy(`user.${s.orderBy}`, s.order);
+      });
     }
 
-    const [entities, total] = await this.userRepository.findAndCount({
-      skip: (paginationOptions.page - 1) * paginationOptions.limit,
-      take: paginationOptions.limit,
-      where,
-      order: sortOptions?.reduce(
-        (acc, s) => ({ ...acc, [s.orderBy]: s.order }),
-        {},
-      ),
-    });
+    qb.skip((paginationOptions.page - 1) * paginationOptions.limit)
+      .take(paginationOptions.limit);
+
+    const [entities, total] = await qb.getManyAndCount();
+
 
     const totalItems = total;
     const totalPages = Math.ceil(totalItems / paginationOptions.limit);
