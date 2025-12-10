@@ -82,16 +82,7 @@ export class UsersService {
     publicId: string,
     user: User,
   ): Promise<void> {
-    const roleId = user?.role?.id;
-
-    const repositoryMap: Record<string, { repo: Repository<any> }> = {
-      [RoleEnum.admin]: { repo: this.userRepository },
-    };
-
-    const config = repositoryMap[roleId];
-    if (!config) return;
-
-    const entity = await config.repo.findOne({ where: { id: user.id } });
+    const entity = await this.userRepository.findOne({ where: { id: user.id } });
     if (!entity) {
       throw new NotFoundException(this.i18nService.t('user.FAIL.NOT_FOUND'));
     }
@@ -102,7 +93,7 @@ export class UsersService {
       entity.publicId = null;
     }
 
-    if (roleId !== RoleEnum.admin && entity.avatar && entity.publicId) {
+    if (entity.avatar && entity.publicId) {
       throw new BadRequestException(
         'Avatar already exists. Please delete the current avatar before uploading a new one.',
       );
@@ -110,7 +101,7 @@ export class UsersService {
 
     entity.avatar = imageUrl;
     entity.publicId = publicId;
-    await config.repo.save(entity);
+    await this.userRepository.save(entity);
   }
 
   async findUserById(userId: User['id']) {
