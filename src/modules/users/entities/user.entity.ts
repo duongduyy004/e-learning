@@ -81,7 +81,6 @@ export class UserEntity {
   deletedAt?: Date;
 
   @BeforeInsert()
-  @BeforeUpdate()
   async hashPassword() {
     if (this.password) {
       const saltRounds = 10;

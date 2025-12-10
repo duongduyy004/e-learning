@@ -224,7 +224,10 @@ export class UsersService {
     if (newPassword !== confirmPassword)
       throw new BadRequestException('newPassword and confirm does not match');
 
-    user.password = newPassword;
+    const saltRounds = 10;
+    const salt = bcrypt.genSaltSync(saltRounds);
+
+    user.password = await bcrypt.hash(newPassword, salt);
     await this.userRepository.save(user);
     return {
       result: 'Password changed successfully!',
