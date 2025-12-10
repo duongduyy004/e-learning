@@ -139,6 +139,10 @@ export class UsersService {
       where.name = ILike(`%${filterOptions.name}%`);
     }
 
+    if (filterOptions?.email) {
+      where.email = ILike(`%${filterOptions.email}%`);
+    }
+
     const [entities, total] = await this.userRepository.findAndCount({
       skip: (paginationOptions.page - 1) * paginationOptions.limit,
       take: paginationOptions.limit,
