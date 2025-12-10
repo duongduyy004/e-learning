@@ -180,6 +180,8 @@ export class UsersService {
   }
 
   async updateUser(userId: User['id'], updateUserDto: UpdateUserDto) {
+    if (updateUserDto?.email)
+      updateUserDto = { ...updateUserDto, isEmailVerified: false }
     await this.userRepository.update({ id: userId }, updateUserDto);
     const updatedUser = await this.userRepository.findOne({
       where: { id: userId },
