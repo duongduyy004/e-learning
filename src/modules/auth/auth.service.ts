@@ -70,7 +70,7 @@ export class AuthService {
       password: signupDto.password,
     });
 
-    await this.sendVerifyEmail(UserMapper.toDomain(user));
+    await this.sendVerifyEmail(user.email);
 
     return user;
   }
@@ -185,12 +185,10 @@ export class AuthService {
     }
   }
 
-  async sendVerifyEmail(user: User) {
+  async sendVerifyEmail(email: string) {
     const token = this.jwtService.sign(
       {
-        id: user.id,
-        name: user.name,
-        email: user.email,
+        email
       },
       {
         secret: this.configService.get('jwt.jwt_confirm_email_secret', {
@@ -203,7 +201,7 @@ export class AuthService {
       },
     );
     return this.mailService.verifyEmail({
-      to: user.email,
+      to: email,
       data: { token },
     });
   }

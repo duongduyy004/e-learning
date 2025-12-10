@@ -27,7 +27,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly i18nService: I18nService<I18nTranslations>,
-  ) {}
+  ) { }
 
   @Public()
   @Post('signup')
@@ -57,11 +57,13 @@ export class AuthController {
     return this.authService.processNewToken(refresh_token, response);
   }
 
+  @Public()
   @Get('send-verify-email')
-  sendVerifyEmail(@UserInfo() user: User) {
-    return this.authService.sendVerifyEmail(user);
+  sendVerifyEmail(@Query('email') email: string) {
+    return this.authService.sendVerifyEmail(email);
   }
 
+  @Public()
   @Patch('verify-email')
   verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
