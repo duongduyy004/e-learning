@@ -119,7 +119,7 @@ export class UsersService {
     return this.userRepository.save(
       this.userRepository.create({
         ...createUserDto,
-        role: { id: createUserDto.roleId || RoleEnum.user },
+        role: { id: RoleEnum.user },
       }),
     );
   }

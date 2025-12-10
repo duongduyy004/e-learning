@@ -25,7 +25,7 @@ export class RolesGuard implements CanActivate {
     const user = request.user;
     if (!user) throw new ForbiddenException('Unauthenticated');
     // Admin bypass
-    if (user.role?.id === RoleEnum.admin) {
+    if (user.role?.id === RoleEnum.superadmin) {
       return true;
     }
 

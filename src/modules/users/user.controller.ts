@@ -20,11 +20,16 @@ import { ChangePasswordDto } from './dto/change-pasword.dto';
 
 @Controller('user')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) { }
 
   @Post()
   createUser(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
+  }
+
+  @Post('admin')
+  createAdmin(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.createAdmin(createUserDto);
   }
 
   @Get()

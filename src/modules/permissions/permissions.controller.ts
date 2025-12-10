@@ -10,31 +10,31 @@ export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) { }
 
   @Post()
-  @Roles(RoleEnum.admin)
+  @Roles(RoleEnum.superadmin)
   create(@Body() createPermissionDto: CreatePermissionDto) {
     return this.permissionsService.create(createPermissionDto);
   }
 
   @Get()
-  @Roles(RoleEnum.admin)
+  @Roles(RoleEnum.superadmin)
   findAllGroupedByModule() {
     return this.permissionsService.findAllGroupedByModule();
   }
 
   @Get(':id')
-  @Roles(RoleEnum.admin)
+  @Roles(RoleEnum.superadmin)
   findOne(@Param('id') id: string) {
     return this.permissionsService.findOne(+id);
   }
 
   @Patch(':id')
-  @Roles(RoleEnum.admin)
+  @Roles(RoleEnum.superadmin)
   update(@Param('id') id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
     return this.permissionsService.update(+id, updatePermissionDto);
   }
 
   @Delete(':id')
-  @Roles(RoleEnum.admin)
+  @Roles(RoleEnum.superadmin)
   remove(@Param('id') id: string) {
     return this.permissionsService.remove(+id);
   }

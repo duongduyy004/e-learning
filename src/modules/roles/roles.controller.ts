@@ -14,31 +14,31 @@ export class RolesController {
     constructor(private readonly rolesService: RolesService) { }
 
     @Get()
-    @Roles(RoleEnum.admin)
+    @Roles(RoleEnum.superadmin)
     findAll(@Query() query: QueryDto<FilterRoleDto, SortRoleDto>) {
         return this.rolesService.findAll(query);
     }
 
     @Post()
-    @Roles(RoleEnum.admin)
+    @Roles(RoleEnum.superadmin)
     create(@Body() createRoleDto: CreateRoleDto) {
         return this.rolesService.create(createRoleDto);
     }
 
     @Get(':id')
-    @Roles(RoleEnum.admin)
+    @Roles(RoleEnum.superadmin)
     findOne(@Param('id') id: string) {
         return this.rolesService.findOne(+id);
     }
 
     @Patch(':id')
-    @Roles(RoleEnum.admin)
+    @Roles(RoleEnum.superadmin)
     update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
         return this.rolesService.update(+id, updateRoleDto);
     }
 
     @Delete(':id')
-    @Roles(RoleEnum.admin)
+    @Roles(RoleEnum.superadmin)
     remove(@Param('id') id: string) {
         return this.rolesService.remove(+id);
     }
