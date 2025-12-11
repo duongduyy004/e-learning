@@ -80,7 +80,7 @@ export class AuthService {
   }
 
   async login(user: User, response: Response) {
-    const { id, name, email, role, avatar, publicId } = user;
+    const { id, name, email, role, avatar, publicId, isEmailVerified } = user;
     const payload = {
       sub: 'token login',
       iss: 'server',
@@ -114,6 +114,7 @@ export class AuthService {
         role,
         avatar,
         publicId,
+        isEmailVerified
       },
     };
   }
@@ -133,7 +134,7 @@ export class AuthService {
       const user = await this.usersService.findUserByToken(refreshToken);
 
       if (user) {
-        const { id, name, email, role, avatar, publicId } = user;
+        const { id, name, email, role, avatar, publicId, isEmailVerified } = user;
         const payload = {
           sub: 'token login',
           iss: 'server',
@@ -169,6 +170,7 @@ export class AuthService {
             role,
             avatar,
             publicId,
+            isEmailVerified
           },
         };
       } else {
@@ -352,7 +354,7 @@ export class AuthService {
       role: user.role,
     };
 
-    const { id, name, email, role, avatar, publicId } = user;
+    const { id, name, email, role, avatar, publicId, isEmailVerified } = user;
 
     const refreshToken = this.createRefreshToken(payload);
     response.cookie('refresh_token', refreshToken, {
@@ -381,6 +383,7 @@ export class AuthService {
         role,
         avatar,
         publicId,
+        isEmailVerified
       },
     };
   }
