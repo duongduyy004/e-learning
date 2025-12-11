@@ -37,6 +37,14 @@ export class AuthService {
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
 
+    if (!user)
+      throw new BadRequestException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          email: `emailNotFound`,
+        },
+      })
+
     if (user?.provider !== AuthProvidersEnum.email) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
