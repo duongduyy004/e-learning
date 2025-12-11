@@ -111,6 +111,11 @@ export class UsersController {
     return this.usersService.softDeleteUser(userId);
   }
 
+  @Patch('restore/:userId')
+  restoreUser(@Param('userId') userId: User['id']) {
+    return this.usersService.restoreUser(userId)
+  }
+
   @Patch('follow/:userId')
   followUser(@UserInfo() user: User, @Param('userId') userId: User['id']) {
     return this.usersService.followUser(user, +userId);

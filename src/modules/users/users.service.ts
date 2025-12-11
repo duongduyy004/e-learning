@@ -193,6 +193,10 @@ export class UsersService {
     return this.userRepository.softDelete({ id: userId });
   }
 
+  async restoreUser(userId: User['id']) {
+    return this.userRepository.restore({ id: userId })
+  }
+
   async removeRefreshToken(userId: User['id']) {
     return await this.userRepository.update(
       { id: userId },
