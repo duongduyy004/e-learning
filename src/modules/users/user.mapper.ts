@@ -20,6 +20,7 @@ export class UserMapper {
         description: raw.role.description,
       };
     }
+    domainEntity.deletedAt = raw.deletedAt;
     return domainEntity;
   }
 }

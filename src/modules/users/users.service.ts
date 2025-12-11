@@ -134,6 +134,7 @@ export class UsersService {
     paginationOptions: IPaginationOptions;
   }): Promise<PaginationResponseDto<User>> {
     const qb = this.userRepository.createQueryBuilder('user')
+      .withDeleted()
       .leftJoinAndSelect('user.role', 'role');
 
     if (filterOptions?.name && filterOptions?.email) {
