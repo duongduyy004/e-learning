@@ -33,8 +33,11 @@ export class UsersController {
   }
 
   @Get()
-  getUsers(@Query() queryDto: QueryDto<FilterUsersDto, SortUsersDto>) {
-    return this.usersService.getUsers({
+  getUsers(
+    @UserInfo() user: User,
+    @Query() queryDto: QueryDto<FilterUsersDto, SortUsersDto>
+  ) {
+    return this.usersService.getUsers(user, {
       filterOptions: queryDto.filters,
       sortOptions: queryDto.sort,
       paginationOptions: {

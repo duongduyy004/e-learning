@@ -124,27 +124,29 @@ export class UsersService {
     );
   }
 
-  async getUsers({
-    filterOptions,
-    sortOptions,
-    paginationOptions,
-  }: {
-    filterOptions?: FilterUsersDto;
-    sortOptions?: SortUsersDto[];
-    paginationOptions: IPaginationOptions;
-  }): Promise<PaginationResponseDto<User>> {
+  async getUsers(
+    user: User,
+    {
+      filterOptions,
+      sortOptions,
+      paginationOptions,
+    }: {
+      filterOptions?: FilterUsersDto;
+      sortOptions?: SortUsersDto[];
+      paginationOptions: IPaginationOptions;
+    }): Promise<PaginationResponseDto<User>> {
     const qb = this.userRepository.createQueryBuilder('user')
       .withDeleted()
-      .leftJoinAndSelect('user.role', 'role');
+      .leftJoinAndSelect('user.role', 'role')
+      .where('user.id != :userId', { userId: user.id })
 
     if (filterOptions?.name && filterOptions?.email) {
-      qb.where('user.name ILIKE :name', { name: `%${filterOptions.name}%` })
-        .orWhere('user.email ILIKE :email', { email: `%${filterOptions.email}%` });
-    } else if (filterOptions?.name) {
-      qb.where('user.name ILIKE :name', { name: `%${filterOptions.name}%` });
-    } else if (filterOptions?.email) {
-      qb.where('user.email ILIKE :email', { email: `%${filterOptions.email}%` });
+      qb.andWhere(
+        '(user.name ILIKE :name OR user.email ILIKE :email)',
+        { name: `%${filterOptions.name}%`, email: `%${filterOptions.email}%` }
+      );
     }
+
 
     if (sortOptions?.length) {
       sortOptions.forEach(s => {
