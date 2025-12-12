@@ -1,10 +1,10 @@
-import { Category } from "modules/categories/category.domain";
+import { Category } from 'modules/categories/category.domain';
 
 export class FilterCategoryDto {
-    title?: string;
+  title?: string;
 }
 
 export class SortCategoryDto {
-    orderBy: keyof Category;
-    order: 'ASC' | 'DESC';
+  orderBy: keyof Category;
+  order: 'ASC' | 'DESC';
 }

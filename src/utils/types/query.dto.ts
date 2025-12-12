@@ -1,31 +1,30 @@
-import { Transform, Type } from "class-transformer";
-import { IsNumber, IsOptional, ValidateNested } from "class-validator";
-
+import { Transform, Type } from 'class-transformer';
+import { IsNumber, IsOptional, ValidateNested } from 'class-validator';
 
 export class QueryDto<Filter = any, Sort = any> {
-    @Transform(({ value }) => (value ? Number(value) : 1))
-    @IsNumber()
-    @IsOptional()
-    page?: number = 1;
+  @Transform(({ value }) => (value ? Number(value) : 1))
+  @IsNumber()
+  @IsOptional()
+  page?: number = 1;
 
-    @Transform(({ value }) => (value ? Number(value) : 10))
-    @IsNumber()
-    @IsOptional()
-    limit?: number = 10;
+  @Transform(({ value }) => (value ? Number(value) : 10))
+  @IsNumber()
+  @IsOptional()
+  limit?: number = 10;
 
-    @IsOptional()
-    @Transform(({ value }) => {
-        return value ? JSON.parse(value) : undefined
-    })
-    @ValidateNested({ each: true })
-    @Type(() => Object)
-    filters?: Filter | null;
+  @IsOptional()
+  @Transform(({ value }) => {
+    return value ? JSON.parse(value) : undefined;
+  })
+  @ValidateNested({ each: true })
+  @Type(() => Object)
+  filters?: Filter | null;
 
-    @IsOptional()
-    @Transform(({ value }) => {
-        return value ? JSON.parse(value) : undefined;
-    })
-    @ValidateNested({ each: true })
-    @Type(() => Object)
-    sort?: Sort[] | null;
+  @IsOptional()
+  @Transform(({ value }) => {
+    return value ? JSON.parse(value) : undefined;
+  })
+  @ValidateNested({ each: true })
+  @Type(() => Object)
+  sort?: Sort[] | null;
 }

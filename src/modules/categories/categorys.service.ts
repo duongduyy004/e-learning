@@ -23,11 +23,14 @@ export class CategoryService {
     private categoryRepository: Repository<CategoryEntity>,
     private wordService: WordsService,
     private dataSource: DataSource,
-  ) { }
+  ) {}
 
   async createCategory(createCategoryDto: CreateCategoryDto) {
     const category = await this.categoryRepository.save(
-      this.categoryRepository.create({ title: createCategoryDto.title, isPublic: createCategoryDto.isPublic ?? false }),
+      this.categoryRepository.create({
+        title: createCategoryDto.title,
+        isPublic: createCategoryDto.isPublic ?? false,
+      }),
     );
 
     if (createCategoryDto.words && createCategoryDto.words.length > 0)
@@ -70,7 +73,7 @@ export class CategoryService {
         {},
       ),
       relations: { words: { question: { choices: true } } },
-      withDeleted: true
+      withDeleted: true,
     });
 
     const totalItems = total;
@@ -131,7 +134,7 @@ export class CategoryService {
   }
 
   async restoreCategory(id: Category['id']) {
-    return this.categoryRepository.restore({ id })
+    return this.categoryRepository.restore({ id });
   }
 
   async addCategoryToUser(userId: number, categoryId: number) {

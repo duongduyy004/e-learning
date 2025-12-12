@@ -30,7 +30,7 @@ export class NotificationsService {
     private userRepository: Repository<UserEntity>,
     private notificationsGateway: NotificationsGateway,
     private dataSource: DataSource,
-  ) { }
+  ) {}
 
   async createAndSendNotification(
     user: User,
@@ -55,30 +55,34 @@ export class NotificationsService {
           relations: ['follower'],
         });
 
-        let notificationsToSave;
+        const notificationsToSave: NotificationEntity[] = [];
 
-        // No followers to notify
-        if (followers.length === 0) {
-          if (createNotificationDto.entityTypeId === ENTITY_TYPE.FOLLOW.id) {
-            notificationsToSave = manager.create(NotificationEntity, {
+        // 1. Notify the target entity (e.g., the user being followed)
+        if (createNotificationDto.entityTypeId === ENTITY_TYPE.FOLLOW.id) {
+          notificationsToSave.push(
+            manager.create(NotificationEntity, {
               notifier: { id: createNotificationDto.entityId },
               object: { id: newNotificationObject.id },
               isRead: false,
-            });
-          } else {
-            // No follower to notify the result action
-            return;
-          }
-        } else {
-          // 4. Create Notification entities
-          notificationsToSave = followers.map((item) =>
+            }),
+          );
+        }
+
+        // 2. Notify the followers of the actor
+        if (followers.length > 0) {
+          const followerNotifications = followers.map((item) =>
             manager.create(NotificationEntity, {
               notifier: { id: item.follower.id },
               object: { id: newNotificationObject.id },
               isRead: false,
             }),
           );
+          notificationsToSave.push(...followerNotifications);
         }
+        if (notificationsToSave.length === 0) {
+          return;
+        }
+
         const savedNotifications = await manager.save(notificationsToSave);
 
         return {
@@ -103,35 +107,37 @@ export class NotificationsService {
       newNotificationObject.entityId,
     );
     const { actor, ...notification } = newNotificationObject;
-
+    const sender = await this.userRepository.findOne({
+      where: { id: user.id },
+    });
     const notificationPayload = {
       ...notification,
-      actor: { name: user.name, avatar: user.avatar },
+      actor: { name: sender.name, avatar: sender.avatar },
       notificationData: entityData,
     };
 
     // 5. Send Real-time Notification
     Array.isArray(savedNotifications)
       ? savedNotifications.forEach((notification) => {
-        if (notification.notifier) {
-          this.notificationsGateway.sendNotification(
-            notification.notifier.id,
-            {
-              ...notificationPayload,
-              isRead: notification?.isRead || false,
-              createdAt: notification?.createdAt,
-            },
-          );
-        }
-      })
+          if (notification.notifier) {
+            this.notificationsGateway.sendNotification(
+              notification.notifier.id,
+              {
+                ...notificationPayload,
+                isRead: notification?.isRead || false,
+                createdAt: notification?.createdAt,
+              },
+            );
+          }
+        })
       : this.notificationsGateway.sendNotification(
-        savedNotifications.notifier.id,
-        {
-          ...notificationPayload,
-          isRead: savedNotifications[0]?.isRead || false,
-          createdAt: savedNotifications[0]?.createdAt,
-        },
-      );
+          savedNotifications.notifier.id,
+          {
+            ...notificationPayload,
+            isRead: savedNotifications[0]?.isRead || false,
+            createdAt: savedNotifications[0]?.createdAt,
+          },
+        );
 
     return savedNotifications;
   }
@@ -179,7 +185,10 @@ export class NotificationsService {
         const notificationPayload = {
           ...notification,
           ...itemData,
-          actor: { name: object?.actor?.name || 'Deleted User', avatar: object?.actor?.avatar || null },
+          actor: {
+            name: object?.actor?.name || 'Deleted User',
+            avatar: object?.actor?.avatar || null,
+          },
           notificationData: entityData,
         };
 
