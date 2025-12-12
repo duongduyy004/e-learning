@@ -348,6 +348,7 @@ export class UsersService {
       result: followings.map((item) => ({
         id: item.following.id,
         name: item.following.name,
+        email: item.following.email,
         avatar: item.following.avatar,
       })),
     };
@@ -394,6 +395,7 @@ export class UsersService {
       result: followers.map((item) => ({
         id: item.follower.id,
         name: item.follower.name,
+        email: item.follower.email,
         avatar: item.follower.avatar,
       })),
     };
